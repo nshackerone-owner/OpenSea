@@ -44,7 +44,7 @@ import { AmountDeriverHelper } from "./fulfillment/AmountDeriverHelper.sol";
 import { OrderDetails } from "../fulfillments/lib/Structs.sol";
 
 interface FailingContractOfferer {
-    function failureReasons(bytes32) external view returns (uint256);
+    function validateFailureReasons(bytes32) external view returns (uint256);
 }
 
 library ZoneParametersLib {
@@ -238,7 +238,7 @@ library ZoneParametersLib {
         bool isRevertingContractOrder = false;
         if (order.orderType == OrderType.CONTRACT) {
             isRevertingContractOrder = FailingContractOfferer(order.offerer)
-                .failureReasons(orderHash) != 0;
+                .validateFailureReasons(orderHash) != 0;
         }
 
         return (

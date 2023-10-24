@@ -811,7 +811,7 @@ contract ReferenceOrderCombiner is
                 AdvancedOrder memory advancedOrder = advancedOrders[i];
 
                 // Ensure restricted orders have valid submitter or pass check.
-                _assertRestrictedAdvancedOrderValidity(
+                _assertRestrictedAdvancedOrderCheckPasses(
                     advancedOrder,
                     orderToExecute,
                     orderHashes,

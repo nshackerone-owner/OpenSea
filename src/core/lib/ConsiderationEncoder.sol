@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {
+    authorizeOrder_selector,
     BasicOrder_additionalRecipients_length_cdPtr,
     BasicOrder_common_params_size,
     BasicOrder_startTime_cdPtr,
@@ -9,6 +10,9 @@ import {
     Common_amount_offset,
     Common_identifier_offset,
     Common_token_offset,
+    Common_CheckOrder_selector_offset,
+    Common_CheckOrder_head_offset,
+    Common_CheckOrder_zoneParameters_offset,
     generateOrder_base_tail_offset,
     generateOrder_context_head_offset,
     generateOrder_head_offset,
@@ -335,6 +339,7 @@ contract ConsiderationEncoder {
         }
     }
 
+    // STUB PRE EXEC HOOK FUNCTIONALITY.
     /**
      * @dev Takes an order hash, OrderParameters struct, extraData bytes array,
      *      and array of order hashes for each order included as part of the
@@ -359,28 +364,39 @@ contract ConsiderationEncoder {
      *              calldata.
      * @return size The size of the bytes array.
      */
-    function _encodeValidateOrder(
+    function _encodeZoneCheckOrder(
         bytes32 orderHash,
         OrderParameters memory orderParameters,
         bytes memory extraData,
-        bytes32[] memory orderHashes
+        bytes32[] memory orderHashes,
+        bool isPreExec
     ) internal view returns (MemoryPointer dst, uint256 size) {
         // Get free memory pointer to write calldata to. This isn't allocated as
         // it is only used for a single function call.
         dst = getFreeMemoryPointer();
 
-        // Write validateOrder selector and get pointer to start of calldata.
-        dst.write(validateOrder_selector);
-        dst = dst.offset(validateOrder_selector_offset);
+        uint256 selector;
+
+        assembly {
+            selector :=
+                add(
+                    mul(validateOrder_selector, iszero(isPreExec)),
+                    mul(authorizeOrder_selector, isPreExec)
+                )
+        }
+
+        // Write the appriate selector and get pointer to start of calldata.
+        dst.write(selector);
+        dst = dst.offset(Common_CheckOrder_selector_offset);
 
         // Get pointer to the beginning of the encoded data.
-        MemoryPointer dstHead = dst.offset(validateOrder_head_offset);
+        MemoryPointer dstHead = dst.offset(Common_CheckOrder_head_offset);
 
         // Write offset to zoneParameters to start of calldata.
-        dstHead.write(validateOrder_zoneParameters_offset);
+        dstHead.write(Common_CheckOrder_zoneParameters_offset);
 
         // Reuse `dstHead` as pointer to zoneParameters.
-        dstHead = dstHead.offset(validateOrder_zoneParameters_offset);
+        dstHead = dstHead.offset(Common_CheckOrder_zoneParameters_offset);
 
         // Write orderHash and fulfiller to zoneParameters.
         dstHead.writeBytes32(orderHash);

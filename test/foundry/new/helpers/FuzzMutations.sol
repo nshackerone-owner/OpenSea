@@ -352,7 +352,7 @@ library MutationFilters {
 
         OffererZoneFailureReason failureReason = HashCalldataContractOfferer(
             payable(order.parameters.offerer)
-        ).failureReasons(
+        ).validateFailureReasons(
             context.executionState.orderDetails[orderIndex].orderHash
         );
 
@@ -1851,7 +1851,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // This mutation triggers a revert by setting a failure reason that gets
         // stored in the HashCalldataContractOfferer.
         HashCalldataContractOfferer(payable(order.parameters.offerer))
-            .setFailureReason(
+            .setValidateFailureReason(
             orderHash, OffererZoneFailureReason.ContractOfferer_generateReverts
         );
 
@@ -1868,7 +1868,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // This mutation triggers a revert by setting a failure reason that gets
         // stored in the HashCalldataContractOfferer.
         HashCalldataContractOfferer(payable(order.parameters.offerer))
-            .setFailureReason(
+            .setValidateFailureReason(
             orderHash,
             OffererZoneFailureReason
                 .ContractOfferer_generateReturnsInvalidEncoding
@@ -1887,7 +1887,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // This mutation triggers a revert by setting a failure reason that gets
         // stored in the HashCalldataContractOfferer.
         HashCalldataContractOfferer(payable(order.parameters.offerer))
-            .setFailureReason(
+            .setValidateFailureReason(
             orderHash, OffererZoneFailureReason.ContractOfferer_ratifyReverts
         );
 
@@ -1904,7 +1904,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // This mutation triggers a revert by setting a failure reason that gets
         // stored in the HashCalldataContractOfferer.
         HashCalldataContractOfferer(payable(order.parameters.offerer))
-            .setFailureReason(
+            .setValidateFailureReason(
             orderHash,
             OffererZoneFailureReason.ContractOfferer_InvalidMagicValue
         );
@@ -1912,7 +1912,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         exec(context);
     }
 
-    function mutation_invalidRestrictedOrderReverts(
+    function mutation_invalidRestrictedOrderRevertsOnAuthorize(
         FuzzTestContext memory context,
         MutationState memory mutationState
     ) external {
@@ -1922,12 +1922,14 @@ contract FuzzMutations is Test, FuzzExecutor {
         // This mutation triggers a revert by setting a failure reason that gets
         // stored in the HashCalldataContractOfferer.
         HashValidationZoneOfferer(payable(order.parameters.zone))
-            .setFailureReason(orderHash, OffererZoneFailureReason.Zone_reverts);
+            .setAuthorizeFailureReason(
+            orderHash, OffererZoneFailureReason.Zone_revertsOnAuthorizeOrder
+        );
 
         exec(context);
     }
 
-    function mutation_invalidRestrictedOrderInvalidMagicValue(
+    function mutation_invalidRestrictedOrderInvalidAuthorizeMagicValue(
         FuzzTestContext memory context,
         MutationState memory mutationState
     ) external {
@@ -1937,8 +1939,44 @@ contract FuzzMutations is Test, FuzzExecutor {
         // This mutation triggers a revert by setting a failure reason that gets
         // stored in the HashCalldataContractOfferer.
         HashValidationZoneOfferer(payable(order.parameters.zone))
-            .setFailureReason(
-            orderHash, OffererZoneFailureReason.Zone_InvalidMagicValue
+            .setAuthorizeFailureReason(
+            orderHash,
+            OffererZoneFailureReason.Zone_InvalidAuthorizeOrderMagicValue
+        );
+
+        exec(context);
+    }
+
+    function mutation_invalidRestrictedOrderRevertsOnValidate(
+        FuzzTestContext memory context,
+        MutationState memory mutationState
+    ) external {
+        AdvancedOrder memory order = mutationState.selectedOrder;
+        bytes32 orderHash = mutationState.selectedOrderHash;
+
+        // This mutation triggers a revert by setting a failure reason that gets
+        // stored in the HashCalldataContractOfferer.
+        HashValidationZoneOfferer(payable(order.parameters.zone))
+            .setValidateFailureReason(
+            orderHash, OffererZoneFailureReason.Zone_revertsOnValidateOrder
+        );
+
+        exec(context);
+    }
+
+    function mutation_invalidRestrictedOrderInvalidValidateMagicValue(
+        FuzzTestContext memory context,
+        MutationState memory mutationState
+    ) external {
+        AdvancedOrder memory order = mutationState.selectedOrder;
+        bytes32 orderHash = mutationState.selectedOrderHash;
+
+        // This mutation triggers a revert by setting a failure reason that gets
+        // stored in the HashCalldataContractOfferer.
+        HashValidationZoneOfferer(payable(order.parameters.zone))
+            .setValidateFailureReason(
+            orderHash,
+            OffererZoneFailureReason.Zone_InvalidValidateOrderMagicValue
         );
 
         exec(context);
@@ -1957,7 +1995,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // This mutation triggers a revert by setting a failure reason that gets
         // stored in the HashCalldataContractOfferer and by mutating the amount
         // of the first item in the offer.
-        offerer.setFailureReason(
+        offerer.setValidateFailureReason(
             orderHash,
             OffererZoneFailureReason.ContractOfferer_InsufficientMinimumReceived
         );
@@ -2001,7 +2039,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // stored in the HashCalldataContractOfferer and by calling a function
         // that stores a value in the contract offerer that causes the contract
         // offerer to change the length of the offer in its `generate` function.
-        offerer.setFailureReason(
+        offerer.setValidateFailureReason(
             orderHash,
             OffererZoneFailureReason.ContractOfferer_IncorrectMinimumReceived
         );
@@ -2045,7 +2083,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // that stores a value in the contract offerer that causes the contract
         // offerer to add an extra item to the consideration in its `generate`
         // function.
-        offerer.setFailureReason(
+        offerer.setValidateFailureReason(
             orderHash,
             OffererZoneFailureReason.ContractOfferer_ExcessMaximumSpent
         );
@@ -2080,7 +2118,7 @@ contract FuzzMutations is Test, FuzzExecutor {
         // that stores a value in the contract offerer that causes the contract
         // offerer to change the amount of a consideration item in its
         // `generate` function.
-        offerer.setFailureReason(
+        offerer.setValidateFailureReason(
             orderHash,
             OffererZoneFailureReason.ContractOfferer_IncorrectMaximumSpent
         );

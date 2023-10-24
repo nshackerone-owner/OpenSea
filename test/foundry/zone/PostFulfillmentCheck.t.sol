@@ -258,7 +258,7 @@ contract PostFulfillmentCheckTest is BaseOrderTest {
             recipient: address(0)
         });
 
-        assertTrue(statefulZone.called());
+        assertTrue(statefulZone.validateOrderCalled());
     }
 
     function testBasicStateful() public {
@@ -498,7 +498,7 @@ contract PostFulfillmentCheckTest is BaseOrderTest {
         });
 
         // assertions
-        assertTrue(statefulZone.called());
+        assertTrue(statefulZone.validateOrderCalled());
         for (uint256 i = 0; i < allAdditional.length; i++) {
             assertEq(
                 token1.balanceOf(allAdditional[i]),
@@ -584,7 +584,7 @@ contract PostFulfillmentCheckTest is BaseOrderTest {
             recipient: address(0),
             maximumFulfilled: 1
         });
-        assertTrue(statefulZone.called());
+        assertTrue(statefulZone.validateOrderCalled());
     }
 
     function testExecMatchAdvancedOrdersWithConduit() public {

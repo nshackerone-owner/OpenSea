@@ -34,7 +34,7 @@ contract StatefulRatifierOfferer is ERC165, ContractOffererInterface {
     ERC20Interface token1;
     ERC721Interface token2;
     uint256 value;
-    bool public called;
+    bool public validateOrderCalled;
     uint256 numOffersToReturn;
 
     constructor(
@@ -247,7 +247,7 @@ contract StatefulRatifierOfferer is ERC165, ContractOffererInterface {
         }
 
         // Set the public called bool to true.
-        called = true;
+        validateOrderCalled = true;
 
         // Return the ratifyOrderMagicValue.
         return ContractOffererInterface.ratifyOrder.selector;

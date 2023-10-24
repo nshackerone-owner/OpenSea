@@ -44,6 +44,8 @@ import {
     TwoWords
 } from "seaport-types/src/lib/ConsiderationConstants.sol";
 
+import "forge-std/console.sol";
+
 /**
  * @title OrderCombiner
  * @author 0age
@@ -703,6 +705,37 @@ contract OrderCombiner is OrderFulfiller, FulfillmentApplier {
         // accessed and modified, however.
         bytes memory accumulator = new bytes(AccumulatorDisarmed);
 
+        // STUB PRE EXEC HOOK FUNCTIONALITY.
+        // If any restricted orders are present in the group of
+        // orders being fulfilled, perform any validateOrder or ratifyOrder
+        // calls after all executions and related transfers are complete.
+        if (containsNonOpen) {
+            // Iterate over each order.
+            for (uint256 i = 0; i < totalOrders;) {
+                OrderType orderType = advancedOrders[i].parameters.orderType;
+                bool isNonContract;
+
+                assembly {
+                    isNonContract := lt(orderType, 4)
+                }
+
+                // TODO: think about hygiene / gas tradeoff between passing the
+                // boolean vs passing the selector here.
+
+                if (isNonContract) {
+                    // Check restricted orders, but not contract orders.
+                    _assertRestrictedAdvancedOrderCheckPasses(
+                        advancedOrders[i], orderHashes, orderHashes[i], true
+                    );
+                }
+
+                // Skip overflow checks as for loop is indexed starting at zero.
+                unchecked {
+                    ++i;
+                }
+            }
+        }
+
         {
             // Declare a variable for the available native token balance.
             uint256 nativeTokenBalance;
@@ -876,8 +909,8 @@ contract OrderCombiner is OrderFulfiller, FulfillmentApplier {
                 // Ensure the order in question is being fulfilled.
                 if (availableOrders[i]) {
                     // Check restricted orders and contract orders.
-                    _assertRestrictedAdvancedOrderValidity(
-                        advancedOrders[i], orderHashes, orderHashes[i]
+                    _assertRestrictedAdvancedOrderCheckPasses(
+                        advancedOrders[i], orderHashes, orderHashes[i], false
                     );
                 }
 

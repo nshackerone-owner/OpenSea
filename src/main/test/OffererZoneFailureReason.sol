@@ -11,6 +11,8 @@ enum OffererZoneFailureReason {
     ContractOfferer_ExcessMaximumSpent, // too many maximum spent items
     ContractOfferer_IncorrectMaximumSpent, // incorrect (too many, wrong token, etc.) maximum spent items
     ContractOfferer_InvalidMagicValue, // Offerer did not return correct magic value
-    Zone_reverts, // Zone validateOrder call reverts
-    Zone_InvalidMagicValue // Zone validateOrder call returns invalid magic value
+    Zone_revertsOnAuthorizeOrder, // Zone authorizeOrder call reverts
+    Zone_revertsOnValidateOrder, // Zone validateOrder call reverts
+    Zone_InvalidAuthorizeOrderMagicValue, // Zone authorizeOrder call returns invalid magic value
+    Zone_InvalidValidateOrderMagicValue // Zone validateOrder call returns invalid magic value
 }

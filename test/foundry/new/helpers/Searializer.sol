@@ -677,8 +677,8 @@ library Searializer {
         tojsonDynArrayBytes4(obj, "checks", value.checks);
         tojsonDynArrayBytes32(
             obj,
-            "expectedZoneCalldataHash",
-            value.expectations.expectedZoneCalldataHash
+            "expectedZoneCalldataHashValidate",
+            value.expectations.expectedZoneCalldataHashValidate
         );
         tojsonDynArrayArray2Bytes32(
             obj,

@@ -78,6 +78,7 @@ contract ZoneInteraction is
         }
     }
 
+    // STUB PRE EXEC HOOK FUNCTIONALITY.
     /**
      * @dev Internal function to determine the post-execution validity of
      *      restricted and contract orders. Restricted orders where the caller
@@ -90,10 +91,11 @@ contract ZoneInteraction is
      *                      the current fulfillment.
      * @param orderHash     The hash of the order.
      */
-    function _assertRestrictedAdvancedOrderValidity(
+    function _assertRestrictedAdvancedOrderCheckPasses(
         AdvancedOrder memory advancedOrder,
         bytes32[] memory orderHashes,
-        bytes32 orderHash
+        bytes32 orderHash,
+        bool isPreExec
     ) internal {
         // Declare variables that will be assigned based on the order type.
         address target;
@@ -108,9 +110,13 @@ contract ZoneInteraction is
         if (
             _isRestrictedAndCallerNotZone(parameters.orderType, parameters.zone)
         ) {
-            // Encode the `validateOrder` call in memory.
-            (callData, size) = _encodeValidateOrder(
-                orderHash, parameters, advancedOrder.extraData, orderHashes
+            // Encode the `authorizeOrder` or `validateOrder` call in memory.
+            (callData, size) = _encodeZoneCheckOrder(
+                orderHash,
+                parameters,
+                advancedOrder.extraData,
+                orderHashes,
+                isPreExec
             );
 
             // Set the target to the zone.

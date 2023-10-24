@@ -111,6 +111,26 @@ contract OrderFulfiller is
         // Retrieve the order parameters after applying criteria resolvers.
         OrderParameters memory orderParameters = advancedOrders[0].parameters;
 
+        // Declare empty bytes32 array and populate with the order hash.
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = orderHash;
+
+        // STUB PRE EXEC HOOK FUNCTIONALITY.
+        OrderType orderType = orderParameters.orderType;
+        bool isNonContract;
+        
+        // TODO: look into whether contract orders ever end up here.
+        assembly {
+            isNonContract := lt(orderType, 4)
+        }
+
+        if (isNonContract) {
+            // Check restricted orders, but not contract orders.
+            _assertRestrictedAdvancedOrderCheckPasses(
+                advancedOrders[0], orderHashes, orderHash, true
+            );
+        }
+
         // Perform each item transfer with the appropriate fractional amount.
         _applyFractionsAndTransferEach(
             orderParameters,
@@ -120,13 +140,9 @@ contract OrderFulfiller is
             recipient
         );
 
-        // Declare empty bytes32 array and populate with the order hash.
-        bytes32[] memory orderHashes = new bytes32[](1);
-        orderHashes[0] = orderHash;
-
         // Ensure restricted orders have a valid submitter or pass a zone check.
-        _assertRestrictedAdvancedOrderValidity(
-            advancedOrders[0], orderHashes, orderHash
+        _assertRestrictedAdvancedOrderCheckPasses(
+            advancedOrders[0], orderHashes, orderHash, false
         );
 
         // Emit an event signifying that the order has been fulfilled.

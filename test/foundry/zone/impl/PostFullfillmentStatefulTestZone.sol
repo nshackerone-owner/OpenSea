@@ -23,7 +23,7 @@ contract PostFulfillmentStatefulTestZone is ERC165, ZoneInterface {
         amountToCheck = amount;
     }
 
-    bool public called = false;
+    bool public validateOrderCalled = false;
 
     function authorizeOrder(ZoneParameters calldata)
         public
@@ -68,7 +68,7 @@ contract PostFulfillmentStatefulTestZone is ERC165, ZoneInterface {
         }
 
         // Set the global called flag to true.
-        called = true;
+        validateOrderCalled = true;
 
         // Return the validOrderMagicValue.
         return ZoneInterface.validateOrder.selector;

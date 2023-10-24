@@ -512,6 +512,10 @@ uint256 constant authorizeOrder_selector_offset = 0x1c;
 uint256 constant authorizeOrder_head_offset = 0x04;
 uint256 constant authorizeOrder_zoneParameters_offset = 0x20;
 
+uint256 constant Common_CheckOrder_selector_offset = 0x1c;
+uint256 constant Common_CheckOrder_head_offset = 0x04;
+uint256 constant Common_CheckOrder_zoneParameters_offset = 0x20;
+
 // uint256 constant ZoneParameters_orderHash_offset = 0x00;
 uint256 constant ZoneParameters_fulfiller_offset = 0x20;
 uint256 constant ZoneParameters_offerer_offset = 0x40;

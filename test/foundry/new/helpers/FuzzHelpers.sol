@@ -744,7 +744,7 @@ library FuzzHelpers {
      * @param maximumFulfilled   The maximum number of orders to fulfill.
      * @param unavailableReasons The availability status.
      *
-     * @return calldataHashes The derived calldata hashes.
+     * @return calldataHashesValidate The derived calldata hashes.
      */
     function getExpectedZoneCalldataHash(
         AdvancedOrder[] memory orders,
@@ -752,9 +752,10 @@ library FuzzHelpers {
         address fulfiller,
         CriteriaResolver[] memory criteriaResolvers,
         uint256 maximumFulfilled,
-        UnavailableReason[] memory unavailableReasons
-    ) internal view returns (bytes32[] memory calldataHashes) {
-        calldataHashes = new bytes32[](orders.length);
+        UnavailableReason[] memory unavailableReasons,
+        bool isPreExec
+    ) internal view returns (bytes32[] memory calldataHashesValidate) {
+        calldataHashesValidate = new bytes32[](orders.length);
 
         ZoneParameters[] memory zoneParameters = orders.getZoneParameters(
             fulfiller,
@@ -765,10 +766,21 @@ library FuzzHelpers {
         );
 
         for (uint256 i; i < zoneParameters.length; ++i) {
-            // Derive the expected calldata hash for the call to validateOrder
-            calldataHashes[i] = keccak256(
-                abi.encodeCall(ZoneInterface.validateOrder, (zoneParameters[i]))
-            );
+            if (isPreExec) {
+                // Derive the expected calldata hash for the call to authorizeOrder
+                calldataHashesValidate[i] = keccak256(
+                    abi.encodeCall(
+                        ZoneInterface.authorizeOrder, (zoneParameters[i])
+                    )
+                );
+            } else {
+                // Derive the expected calldata hash for the call to validateOrder
+                calldataHashesValidate[i] = keccak256(
+                    abi.encodeCall(
+                        ZoneInterface.validateOrder, (zoneParameters[i])
+                    )
+                );
+            }
         }
     }
 
@@ -795,13 +807,14 @@ library FuzzHelpers {
             }
         }
 
-        bytes32[2][] memory calldataHashes = new bytes32[2][](orders.length);
+        bytes32[2][] memory calldataHashesValidate =
+            new bytes32[2][](orders.length);
 
-        // Iterate over contract orders to derive calldataHashes
+        // Iterate over contract orders to derive calldataHashesValidate
         for (uint256 i; i < orders.length; ++i) {
             AdvancedOrder memory order = orders[i];
 
-            // calldataHashes for non-contract orders should be null
+            // calldataHashesValidate for non-contract orders should be null
             if (getType(order) != Type.CONTRACT) {
                 continue;
             }
@@ -813,7 +826,7 @@ library FuzzHelpers {
                 order.parameters.consideration.toSpentItemArray();
 
             // Derive the expected calldata hash for the call to generateOrder
-            calldataHashes[i][0] = keccak256(
+            calldataHashesValidate[i][0] = keccak256(
                 abi.encodeCall(
                     ContractOffererInterface.generateOrder,
                     (fulfiller, minimumReceived, maximumSpent, order.extraData)
@@ -827,7 +840,7 @@ library FuzzHelpers {
             uint256 counter = shiftedOfferer ^ uint256(orderHashes[i]);
 
             // Derive the expected calldata hash for the call to ratifyOrder
-            calldataHashes[i][1] = keccak256(
+            calldataHashesValidate[i][1] = keccak256(
                 abi.encodeCall(
                     ContractOffererInterface.ratifyOrder,
                     (
@@ -841,7 +854,7 @@ library FuzzHelpers {
             );
         }
 
-        return calldataHashes;
+        return calldataHashesValidate;
     }
 
     /**

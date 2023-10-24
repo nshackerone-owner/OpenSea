@@ -110,7 +110,7 @@ contract ReferenceOrderFulfiller is
         priorOrderHashes[0] = orderHash;
 
         // Ensure restricted orders have a valid submitter or pass a zone check.
-        _assertRestrictedAdvancedOrderValidity(
+        _assertRestrictedAdvancedOrderCheckPasses(
             advancedOrder,
             orderToExecute,
             priorOrderHashes,

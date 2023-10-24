@@ -107,7 +107,7 @@ contract ReferenceZoneInteraction is ZoneInteractionErrors {
      * @param offerer        The offerer in question.
      * @param zone           The zone in question.
      */
-    function _assertRestrictedAdvancedOrderValidity(
+    function _assertRestrictedAdvancedOrderCheckPasses(
         AdvancedOrder memory advancedOrder,
         OrderToExecute memory orderToExecute,
         bytes32[] memory orderHashes,

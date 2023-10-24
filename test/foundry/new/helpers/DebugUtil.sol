@@ -42,7 +42,8 @@ struct ContextOutputSelection {
     bool basicOrderParameters;
     bool testHelpers;
     bool checks;
-    bool expectedZoneCalldataHash;
+    bool expectedZoneCalldataHashAuthorize;
+    bool expectedZoneCalldataHashValidate;
     bool expectedContractOrderCalldataHashes;
     bool expectedResults;
     bool expectedImplicitExecutions;
@@ -216,11 +217,11 @@ function dumpContext(
             cast(context.executionState.preExecOrderStatuses)
         );
     }
-    // if (outputSelection.expectedZoneCalldataHash) {
+    // if (outputSelection.expectedZoneCalldataHashValidate) {
     //     jsonOut = Searializer.tojsonDynArrayBytes32(
     //         "root",
-    //         "expectedZoneCalldataHash",
-    //         context.expectations.expectedZoneCalldataHash
+    //         "expectedZoneCalldataHashValidate",
+    //         context.expectations.expectedZoneCalldataHashValidate
     //     );
     // }
     // if (outputSelection.expectedContractOrderCalldataHashes) {
