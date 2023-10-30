@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
+import "forge-std/console.sol";
+
 type CalldataPointer is uint256;
 
 type ReturndataPointer is uint256;
@@ -236,17 +238,51 @@ library ReturndataPointerLib {
     }
 }
 
+// BREADCRUMB: copy
+
 library MemoryPointerLib {
     function copy(MemoryPointer src, MemoryPointer dst, uint256 size)
         internal
         view
     {
+        // // console.log('in copy 2');
+
+        // bool success;
+
+        // uint256 returnDataSize;
+
+        // assembly {
+        //     success :=
+        //         staticcall(gas(), IdentityPrecompileAddress, src, size, dst, size)
+
+        //     returnDataSize := returndatasize()
+        // }
+
+        // // console.log('success');
+        // console.log(success);
+
+        // // console.log('returnDataSize');
+        // console.log(returnDataSize);
+        
+        // // console.log('in copy 1');
+
+        // // assembly {
+        // //     success :=
+        // //         staticcall(gas(), IdentityPrecompileAddress, src, size, dst, size)
+        // //     if or(iszero(returndatasize()), iszero(success)) { revert(0, 0) }
+        // // }
+
+        // TODO: Come back and ask the gang about this `iszero(returndatasize()`
+
         assembly {
             let success :=
                 staticcall(gas(), IdentityPrecompileAddress, src, size, dst, size)
-            if or(iszero(returndatasize()), iszero(success)) { revert(0, 0) }
+            if iszero(success) { revert(0, 0) }
         }
+
+        // // console.log('in copy 0');
     }
+    
 
     function lt(MemoryPointer a, MemoryPointer b)
         internal
@@ -298,6 +334,19 @@ library MemoryPointerLib {
     function next(MemoryPointer mPtr)
         internal
         pure
+        returns (MemoryPointer mPtrNext)
+    {
+        assembly {
+            mPtrNext := add(mPtr, _OneWord)
+        }
+    }
+
+    // BREADCRUMB next
+
+    /// @dev Returns the memory pointer one word after `mPtr`.
+    function nextButItsAViewFunction(MemoryPointer mPtr)
+        internal
+        view
         returns (MemoryPointer mPtrNext)
     {
         assembly {

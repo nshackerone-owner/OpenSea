@@ -70,7 +70,7 @@ contract TestTransferValidationZoneOfferer is
         _expectedOfferRecipient = expectedOfferRecipient;
     }
 
-    bool public called = false;
+    bool public validateOrderCalled = false;
     uint256 public callCount = 0;
 
     function authorizeOrder(ZoneParameters calldata)
@@ -145,8 +145,8 @@ contract TestTransferValidationZoneOfferer is
         // Ensure that the expected recipient has received all offer items.
         _assertValidSpentItems(expectedOfferRecipient, zoneParameters.offer);
 
-        // Set the global called flag to true.
-        called = true;
+        // Set the global validateOrderCalled flag to true.
+        validateOrderCalled = true;
         callCount++;
 
         // Return the selector of validateOrder as the magic value.
@@ -235,8 +235,8 @@ contract TestTransferValidationZoneOfferer is
         // Ensure that the expected recipient has received all offer items.
         _assertValidSpentItems(expectedOfferRecipient, minimumReceived);
 
-        // Set the global called flag to true.
-        called = true;
+        // Set the global validateOrderCalled flag to true.
+        validateOrderCalled = true;
         callCount++;
 
         return this.ratifyOrder.selector;

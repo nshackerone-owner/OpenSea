@@ -241,6 +241,19 @@ struct Execution {
     bytes32 conduitKey;
 }
 
+struct ZoneAuthorizeParameters {
+    bytes32 orderHash;
+    address fulfiller;
+    address offerer;
+    OfferItem[] offer;
+    ConsiderationItem[] consideration;
+    bytes extraData;
+    bytes32[] orderHashes;
+    uint256 startTime;
+    uint256 endTime;
+    bytes32 zoneHash;
+}
+
 /**
  * @dev Restricted orders are validated post-execution by calling validateOrder
  *      on the zone. This struct provides context about the order fulfillment

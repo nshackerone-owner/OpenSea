@@ -33,6 +33,8 @@ import {
     InvalidRestrictedOrder_error_selector
 } from "seaport-types/src/lib/ConsiderationErrorConstants.sol";
 
+import "forge-std/console.sol";
+
 /**
  * @title ZoneInteraction
  * @author 0age
@@ -90,10 +92,11 @@ contract ZoneInteraction is
      *                      the current fulfillment.
      * @param orderHash     The hash of the order.
      */
-    function _assertRestrictedAdvancedOrderValidity(
+    function _assertRestrictedAdvancedOrderCheckPasses(
         AdvancedOrder memory advancedOrder,
         bytes32[] memory orderHashes,
-        bytes32 orderHash
+        bytes32 orderHash,
+        bool isPreExec
     ) internal {
         // Declare variables that will be assigned based on the order type.
         address target;
@@ -104,14 +107,19 @@ contract ZoneInteraction is
         // Retrieve the parameters of the order in question.
         OrderParameters memory parameters = advancedOrder.parameters;
 
+        // console.log('in _assertRestrictedAdvancedOrderCheckPasses above _isRestrictedAndCallerNotZone');
+
         // OrderType 2-3 require zone to be caller or approve via validateOrder.
         if (
             _isRestrictedAndCallerNotZone(parameters.orderType, parameters.zone)
         ) {
+            // console.log('in _assertRestrictedAdvancedOrderCheckPasses above _encodeZoneCheckOrder');
             // Encode the `validateOrder` call in memory.
-            (callData, size) = _encodeValidateOrder(
-                orderHash, parameters, advancedOrder.extraData, orderHashes
+            (callData, size) = _encodeZoneCheckOrder(
+                orderHash, parameters, advancedOrder.extraData, orderHashes, isPreExec
             );
+
+            // console.log('in _assertRestrictedAdvancedOrderCheckPasses below _encodeZoneCheckOrder');
 
             // Set the target to the zone.
             target = (

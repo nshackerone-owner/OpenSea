@@ -113,6 +113,56 @@ abstract contract FuzzChecks is Test {
         }
     }
 
+    // TODO: refactor and fix so that it handles the partial hash array.
+    /**
+     * @dev Check that the zone is getting the right calldata.
+     *
+     * @param context A Fuzz test context.
+     */
+    function check_authorizeOrderExpectedDataHash(
+        FuzzTestContext memory context
+    ) public {
+        // Iterate over the orders.
+        for (uint256 i; i < context.executionState.orders.length; i++) {
+            OrderParameters memory order =
+                context.executionState.orders[i].parameters;
+
+            // If the order is restricted, check the calldata.
+            if (
+                order.orderType == OrderType.FULL_RESTRICTED
+                    || order.orderType == OrderType.PARTIAL_RESTRICTED
+            ) {
+                testZone = payable(order.zone);
+
+                // Each order has a calldata hash, indexed to orders, that is
+                // expected to be returned by the zone.
+                bytes32 expectedCalldataHash =
+                    context.expectations.expectedZoneCalldataHashAuthorize[i];
+
+                bytes32 orderHash =
+                    context.executionState.orderDetails[i].orderHash;
+
+                // NOTE: `orderHashToAuthorizeOrderDataHash` is the only diff.
+
+                // Use order hash to get the expected calldata hash from zone.
+                // TODO: fix this in cases where contract orders are part of
+                // orderHashes (the hash calculation is most likely incorrect).
+                bytes32 actualCalldataHash = HashValidationZoneOfferer(testZone)
+                    .orderHashToAuthorizeOrderDataHash(orderHash);
+
+                // TODO: figure out why the hashes are wrong.
+
+                // Check that the expected calldata hash matches the actual
+                // calldata hash.
+                assertEq(
+                    actualCalldataHash,
+                    expectedCalldataHash,
+                    "check_authorizeOrderExpectedDataHash: actualCalldataHash != expectedCalldataHash"
+                );
+            }
+        }
+    }
+
     /**
      * @dev Check that the zone is getting the right calldata.
      *
@@ -136,7 +186,7 @@ abstract contract FuzzChecks is Test {
                 // Each order has a calldata hash, indexed to orders, that is
                 // expected to be returned by the zone.
                 bytes32 expectedCalldataHash =
-                    context.expectations.expectedZoneCalldataHash[i];
+                    context.expectations.expectedZoneCalldataHashValidate[i];
 
                 bytes32 orderHash =
                     context.executionState.orderDetails[i].orderHash;

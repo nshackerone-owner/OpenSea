@@ -502,15 +502,19 @@ uint256 constant ratifyOrder_orderHashes_head_offset = 0x60;
 uint256 constant ratifyOrder_contractNonce_offset = 0x80;
 uint256 constant ratifyOrder_base_tail_offset = 0xa0;
 
+uint256 constant authorizeOrder_selector = 0x01e4d72a;
+uint256 constant authorizeOrder_selector_offset = 0x1c;
+uint256 constant authorizeOrder_head_offset = 0x04;
+uint256 constant authorizeOrder_zoneParameters_offset = 0x20;
+
 uint256 constant validateOrder_selector = 0x17b1f942;
 uint256 constant validateOrder_selector_offset = 0x1c;
 uint256 constant validateOrder_head_offset = 0x04;
 uint256 constant validateOrder_zoneParameters_offset = 0x20;
 
-uint256 constant authorizeOrder_selector = 0x01e4d72a;
-uint256 constant authorizeOrder_selector_offset = 0x1c;
-uint256 constant authorizeOrder_head_offset = 0x04;
-uint256 constant authorizeOrder_zoneParameters_offset = 0x20;
+uint256 constant Common_CheckOrder_selector_offset = 0x1c;
+uint256 constant Common_CheckOrder_head_offset = 0x04;
+uint256 constant Common_CheckOrder_zoneParameters_offset = 0x20;
 
 // uint256 constant ZoneParameters_orderHash_offset = 0x00;
 uint256 constant ZoneParameters_fulfiller_offset = 0x20;

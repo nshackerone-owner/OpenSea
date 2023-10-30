@@ -42,7 +42,8 @@ struct ContextOutputSelection {
     bool basicOrderParameters;
     bool testHelpers;
     bool checks;
-    bool expectedZoneCalldataHash;
+    bool expectedZoneCalldataHashAuthorize;
+    bool expectedZoneCalldataHashValidate;
     bool expectedContractOrderCalldataHashes;
     bool expectedResults;
     bool expectedImplicitExecutions;
@@ -361,7 +362,7 @@ function pureDumpContext()
     pure
     returns (
         function(FuzzTestContext memory, ContextOutputSelection memory) internal pure
-            pureFn
+        pureFn
     )
 {
     function(FuzzTestContext memory, ContextOutputSelection memory)
@@ -450,7 +451,7 @@ library ExecutionFilterCast {
         pure
         returns (
             function(Execution[] memory, function(Execution memory, ItemType) internal pure returns (bool), ItemType ) internal pure returns (Execution[] memory)
-                fnOut
+            fnOut
         )
     {
         assembly {

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {
+    authorizeOrder_selector,
     BasicOrder_additionalRecipients_length_cdPtr,
     BasicOrder_common_params_size,
     BasicOrder_startTime_cdPtr,
@@ -9,6 +10,9 @@ import {
     Common_amount_offset,
     Common_identifier_offset,
     Common_token_offset,
+    Common_CheckOrder_selector_offset,
+    Common_CheckOrder_head_offset,
+    Common_CheckOrder_zoneParameters_offset,
     generateOrder_base_tail_offset,
     generateOrder_context_head_offset,
     generateOrder_head_offset,
@@ -67,6 +71,8 @@ import {
     getFreeMemoryPointer,
     MemoryPointer
 } from "seaport-types/src/helpers/PointerLibraries.sol";
+
+import "forge-std/console.sol";
 
 contract ConsiderationEncoder {
     /**
@@ -335,6 +341,7 @@ contract ConsiderationEncoder {
         }
     }
 
+    // STUB PRE EXEC HOOK FUNCTIONALITY.
     /**
      * @dev Takes an order hash, OrderParameters struct, extraData bytes array,
      *      and array of order hashes for each order included as part of the
@@ -359,28 +366,45 @@ contract ConsiderationEncoder {
      *              calldata.
      * @return size The size of the bytes array.
      */
-    function _encodeValidateOrder(
+    function _encodeZoneCheckOrder(
         bytes32 orderHash,
         OrderParameters memory orderParameters,
         bytes memory extraData,
-        bytes32[] memory orderHashes
+        bytes32[] memory orderHashes,
+        bool isPreExec
     ) internal view returns (MemoryPointer dst, uint256 size) {
         // Get free memory pointer to write calldata to. This isn't allocated as
         // it is only used for a single function call.
         dst = getFreeMemoryPointer();
 
-        // Write validateOrder selector and get pointer to start of calldata.
-        dst.write(validateOrder_selector);
-        dst = dst.offset(validateOrder_selector_offset);
+        // // console.log('in _encodeZoneCheckOrder 1');
+
+        uint256 selector;
+
+        assembly {
+            selector :=
+                add(
+                    mul(validateOrder_selector, iszero(isPreExec)),
+                    mul(authorizeOrder_selector, isPreExec)
+                )
+        }
+
+        // Write the appriate selector and get pointer to start of calldata.
+        dst.write(selector);
+        dst = dst.offset(Common_CheckOrder_selector_offset);
+
+        // console.log('in _encodeZoneCheckOrder 2');
 
         // Get pointer to the beginning of the encoded data.
-        MemoryPointer dstHead = dst.offset(validateOrder_head_offset);
+        MemoryPointer dstHead = dst.offset(Common_CheckOrder_head_offset);
 
         // Write offset to zoneParameters to start of calldata.
-        dstHead.write(validateOrder_zoneParameters_offset);
+        dstHead.write(Common_CheckOrder_zoneParameters_offset);
 
         // Reuse `dstHead` as pointer to zoneParameters.
-        dstHead = dstHead.offset(validateOrder_zoneParameters_offset);
+        dstHead = dstHead.offset(Common_CheckOrder_zoneParameters_offset);
+
+        // console.log('in _encodeZoneCheckOrder 3');
 
         // Write orderHash and fulfiller to zoneParameters.
         dstHead.writeBytes32(orderHash);
@@ -388,6 +412,8 @@ contract ConsiderationEncoder {
 
         // Get the memory pointer to the order parameters struct.
         MemoryPointer src = orderParameters.toMemoryPointer();
+
+        // console.log('in _encodeZoneCheckOrder 4');
 
         // Copy offerer, startTime, endTime and zoneHash to zoneParameters.
         dstHead.offset(ZoneParameters_offerer_offset).write(src.readUint256());
@@ -400,6 +426,8 @@ contract ConsiderationEncoder {
         dstHead.offset(ZoneParameters_zoneHash_offset).write(
             src.offset(OrderParameters_zoneHash_offset).readUint256()
         );
+
+        // console.log('in _encodeZoneCheckOrder 5');
 
         // Initialize tail offset, used to populate the offer array.
         uint256 tailOffset = ZoneParameters_base_tail_offset;
@@ -414,6 +442,8 @@ contract ConsiderationEncoder {
         // Encode the offer array as a `SpentItem[]`.
         uint256 offerSize =
             _encodeSpentItems(srcOfferPointer, dstHead.offset(tailOffset));
+
+        // console.log('in _encodeZoneCheckOrder 6');
 
         unchecked {
             // Increment tail offset, now used to populate consideration array.
@@ -430,6 +460,8 @@ contract ConsiderationEncoder {
             OrderParameters_consideration_head_offset
         ).readMemoryPointer();
 
+        // console.log('in _encodeZoneCheckOrder 7');
+
         // Encode the consideration array as a `ReceivedItem[]`.
         uint256 considerationSize = _encodeConsiderationAsReceivedItems(
             srcConsiderationPointer, dstHead.offset(tailOffset)
@@ -439,6 +471,8 @@ contract ConsiderationEncoder {
             // Increment tail offset, now used to populate extraData array.
             tailOffset += considerationSize;
         }
+
+        // console.log('in _encodeZoneCheckOrder 8');
 
         // Write offset to extraData.
         dstHead.offset(ZoneParameters_extraData_head_offset).write(tailOffset);
@@ -451,6 +485,8 @@ contract ConsiderationEncoder {
             tailOffset += extraDataSize;
         }
 
+        // console.log('in _encodeZoneCheckOrder 9');
+
         // Write offset to orderHashes.
         dstHead.offset(ZoneParameters_orderHashes_head_offset).write(tailOffset);
 
@@ -459,6 +495,8 @@ contract ConsiderationEncoder {
             toMemoryPointer(orderHashes), dstHead.offset(tailOffset)
         );
 
+        // console.log('in _encodeZoneCheckOrder 10');
+
         unchecked {
             // Increment the tail offset, now used to determine final size.
             tailOffset += orderHashesSize;
@@ -466,6 +504,8 @@ contract ConsiderationEncoder {
             // Derive final size including selector and ZoneParameters pointer.
             size = ZoneParameters_selectorAndPointer_length + tailOffset;
         }
+
+        // console.log('in _encodeZoneCheckOrder 11');
     }
 
     /**
@@ -566,7 +606,7 @@ contract ConsiderationEncoder {
             // Write the single order hash to the orderHashes array.
             dstHead.offset(tailOffset + OneWord).writeBytes32(orderHash);
 
-            // Final size: selector, ZoneParameters pointer, orderHashes & tail.
+            // Final size: selector, zoneParameters pointer, orderHashes & tail.
             size = ZoneParameters_basicOrderFixedElements_length + tailOffset;
         }
     }
@@ -589,21 +629,52 @@ contract ConsiderationEncoder {
         MemoryPointer srcLength,
         MemoryPointer dstLength
     ) internal view returns (uint256 size) {
+
+        // console.log('in _encodeOrderHashes 1');
+
         // Read length of the array from source and write to destination.
         uint256 length = srcLength.readUint256();
         dstLength.write(length);
+
+        // console.log('in _encodeOrderHashes 2');
 
         unchecked {
             // Determine head & tail size as one word per element in the array.
             uint256 headAndTailSize = length << OneWordShift;
 
+            // console.log('in _encodeOrderHashes 2.1');
+
+            uint256 srcLengthValue;
+            uint256 dstLengthValue;
+
+            assembly {
+                srcLengthValue := srcLength
+                dstLengthValue := dstLength
+            }
+
+            // console.log("length");
+            // console.log(length);
+
+            // console.log("srcLength");
+            // console.log(srcLengthValue);
+
+            // console.log("dstLength");
+            // console.log(dstLengthValue);
+
+            // console.log("headAndTailSize");
+            // console.log(headAndTailSize);
+
             // Copy the tail starting from the next element of the source to the
             // next element of the destination.
-            srcLength.next().copy(dstLength.next(), headAndTailSize);
+            srcLength.nextButItsAViewFunction().copy(dstLength.next(), headAndTailSize);
+
+            // console.log('in _encodeOrderHashes 2.2');
 
             // Set size to the length of the tail plus one word for length.
             size = headAndTailSize + OneWord;
         }
+
+        // console.log('in _encodeOrderHashes 3');
     }
 
     /**

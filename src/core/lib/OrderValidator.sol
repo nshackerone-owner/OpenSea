@@ -51,6 +51,8 @@ import {
     Panic_error_selector
 } from "seaport-types/src/lib/ConsiderationErrorConstants.sol";
 
+import "forge-std/console.sol";
+
 /**
  * @title OrderValidator
  * @author 0age
@@ -137,7 +139,8 @@ contract OrderValidator is Executor, ZoneInteraction {
      */
     function _validateOrderAndUpdateStatus(
         AdvancedOrder memory advancedOrder,
-        bool revertOnInvalid
+        bool revertOnInvalid,
+        bytes32[] memory priorOrderHashes
     )
         internal
         returns (bytes32 orderHash, uint256 numerator, uint256 denominator)
@@ -222,6 +225,15 @@ contract OrderValidator is Executor, ZoneInteraction {
 
         // Retrieve current counter & use it w/ parameters to derive order hash.
         orderHash = _assertConsiderationLengthAndGetOrderHash(orderParameters);
+
+        // console.log('in _validateOrderAndUpdateStatus above _assertRestrictedAdvancedOrderCheckPasses');
+
+        // Check restricted orders and contract orders.
+        _assertRestrictedAdvancedOrderCheckPasses(
+            advancedOrder, priorOrderHashes, orderHash, true
+        );
+
+        // console.log('in _validateOrderAndUpdateStatus below _assertRestrictedAdvancedOrderCheckPasses');
 
         // Retrieve the order status using the derived order hash.
         OrderStatus storage orderStatus = _orderStatus[orderHash];

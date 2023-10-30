@@ -51,6 +51,10 @@ import { FuzzInscribers } from "./FuzzInscribers.sol";
 
 import { assume } from "./VmUtils.sol";
 
+import "forge-std/console.sol";
+
+import "seaport-sol/src/helm.sol";
+
 /**
  * @dev The "structure" of the order.
  *      - BASIC: adheres to basic construction rules.
@@ -743,6 +747,7 @@ library FuzzHelpers {
      * @param criteriaResolvers  The criteria resolvers.
      * @param maximumFulfilled   The maximum number of orders to fulfill.
      * @param unavailableReasons The availability status.
+     * @param isPreExec          Whether or not the call is pre-execution.
      *
      * @return calldataHashes The derived calldata hashes.
      */
@@ -752,7 +757,8 @@ library FuzzHelpers {
         address fulfiller,
         CriteriaResolver[] memory criteriaResolvers,
         uint256 maximumFulfilled,
-        UnavailableReason[] memory unavailableReasons
+        UnavailableReason[] memory unavailableReasons,
+        bool isPreExec
     ) internal view returns (bytes32[] memory calldataHashes) {
         calldataHashes = new bytes32[](orders.length);
 
@@ -765,10 +771,30 @@ library FuzzHelpers {
         );
 
         for (uint256 i; i < zoneParameters.length; ++i) {
-            // Derive the expected calldata hash for the call to validateOrder
-            calldataHashes[i] = keccak256(
-                abi.encodeCall(ZoneInterface.validateOrder, (zoneParameters[i]))
-            );
+            // TODO: update to the new pre exec pattern.
+            if (isPreExec) {
+                console.log("");
+                console.log("i");
+                console.log(i);
+
+                // Derive the expected calldata hash for the call to authorizeOrder
+                calldataHashes[i] = keccak256(
+                    abi.encodeCall(
+                        ZoneInterface.authorizeOrder, (zoneParameters[i])
+                    )
+                );
+
+                console.log("");
+                console.log("ZoneParameters in MOAT");
+                helm.log(zoneParameters[i]);
+            } else {
+                // Derive the expected calldata hash for the call to validateOrder
+                calldataHashes[i] = keccak256(
+                    abi.encodeCall(
+                        ZoneInterface.validateOrder, (zoneParameters[i])
+                    )
+                );
+            }
         }
     }
 

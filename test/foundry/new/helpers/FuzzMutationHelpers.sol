@@ -567,7 +567,7 @@ library MutationEligibilityLib {
         pure
         returns (
             function(FuzzTestContext memory) internal view returns (bool)
-                ineligibleMutationFilter
+            ineligibleMutationFilter
         )
     {
         assembly {
@@ -580,7 +580,7 @@ library MutationEligibilityLib {
         pure
         returns (
             function(AdvancedOrder memory, uint256, FuzzTestContext memory) internal view returns (bool)
-                ineligibleMutationFilter
+            ineligibleMutationFilter
         )
     {
         assembly {
@@ -593,7 +593,7 @@ library MutationEligibilityLib {
         pure
         returns (
             function(CriteriaResolver memory, uint256, FuzzTestContext memory) internal view returns (bool)
-                ineligibleMutationFilter
+            ineligibleMutationFilter
         )
     {
         assembly {
@@ -763,7 +763,7 @@ library FailureDetailsHelperLib {
         pure
         returns (
             function(FuzzTestContext memory, MutationState memory, bytes4) internal view returns (bytes memory)
-                revertReasonGenerator
+            revertReasonGenerator
         )
     {
         assembly {

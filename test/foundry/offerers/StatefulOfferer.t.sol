@@ -96,7 +96,7 @@ contract StatefulOffererTest is BaseOrderTest {
             recipient: address(0)
         });
 
-        assertTrue(offerer.called());
+        assertTrue(offerer.ratifyOrderCalled());
     }
 
     function testCancelAdvancedRevert() public {
@@ -203,7 +203,7 @@ contract StatefulOffererTest is BaseOrderTest {
             recipient: address(0)
         });
 
-        assertTrue(offerer.called());
+        assertTrue(offerer.ratifyOrderCalled());
     }
 
     function testMatchAdvancedOrders() public {
@@ -286,7 +286,7 @@ contract StatefulOffererTest is BaseOrderTest {
             fulfillments: fulfillments,
             recipient: address(0)
         });
-        assertTrue(offerer.called());
+        assertTrue(offerer.ratifyOrderCalled());
     }
 
     function testFulfillAvailableAdvancedOrders() public {
@@ -369,7 +369,7 @@ contract StatefulOffererTest is BaseOrderTest {
             recipient: address(0),
             maximumFulfilled: 1
         });
-        assertTrue(offerer.called());
+        assertTrue(offerer.ratifyOrderCalled());
     }
 
     function createMirrorContractOffererOrder(

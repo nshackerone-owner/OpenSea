@@ -53,6 +53,7 @@ import {
 } from "seaport-types/src/lib/TokenTransferrerConstants.sol";
 
 import {
+    authorizeOrder_selector,
     generateOrder_selector,
     ratifyOrder_selector,
     validateOrder_selector
@@ -443,6 +444,10 @@ contract ConstantsTest is BaseConsiderationTest {
         _test(
             ratifyOrder_selector, ContractOffererInterface.ratifyOrder.selector
         );
+    }
+
+    function testAuthorizeOrder_selector() public {
+        _test(authorizeOrder_selector, ZoneInterface.authorizeOrder.selector);
     }
 
     function testValidateOrder_selector() public {

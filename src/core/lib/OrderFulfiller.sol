@@ -33,6 +33,8 @@ import {
     ReceivedItem_recipient_offset
 } from "seaport-types/src/lib/ConsiderationConstants.sol";
 
+import "forge-std/console.sol";
+
 /**
  * @title OrderFulfiller
  * @author 0age
@@ -95,9 +97,22 @@ contract OrderFulfiller is
             advancedOrder.parameters.orderType == OrderType.CONTRACT
         );
 
+        // console.log('in _validateAndFulfillAdvancedOrder above _validateOrderAndUpdateStatus');
+
+        // Declare empty bytes32 array (unused, will remain empty).
+        // bytes32[] memory priorOrderHashes;
+
+        bytes32[] memory priorOrderHashes = new bytes32[](1);
+
         // Validate order, update status, and determine fraction to fill.
         (bytes32 orderHash, uint256 fillNumerator, uint256 fillDenominator) =
-            _validateOrderAndUpdateStatus(advancedOrder, true);
+            _validateOrderAndUpdateStatus(
+                advancedOrder,
+                true,
+                priorOrderHashes
+            );
+
+        // console.log('in _validateAndFulfillAdvancedOrder below _validateOrderAndUpdateStatus');
 
         // Create an array with length 1 containing the order.
         AdvancedOrder[] memory advancedOrders = new AdvancedOrder[](1);
@@ -125,8 +140,8 @@ contract OrderFulfiller is
         orderHashes[0] = orderHash;
 
         // Ensure restricted orders have a valid submitter or pass a zone check.
-        _assertRestrictedAdvancedOrderValidity(
-            advancedOrders[0], orderHashes, orderHash
+        _assertRestrictedAdvancedOrderCheckPasses(
+            advancedOrders[0], orderHashes, orderHash, false
         );
 
         // Emit an event signifying that the order has been fulfilled.
