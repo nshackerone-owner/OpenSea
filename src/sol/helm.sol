@@ -27,7 +27,8 @@ import {
     OrderParameters,
     ReceivedItem,
     SpentItem,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 /**
@@ -451,11 +452,62 @@ library helm {
         console.log(gStr(i, "}"));
     }
 
-    function log(ZoneParameters memory zoneParameters) public view {
+    function log(ZoneAuthorizeParameters memory zoneAuthorizeParameters)
+        public
+        view
+    {
+        logZoneParameters(zoneAuthorizeParameters, 0);
+    }
+
+    function log(ZoneAuthorizeParameters[] memory zoneAuthorizeParametersArray)
+        public
+        view
+    {
+        console.log(gStr(0, "zoneAuthorizeParametersArray: ["));
+        for (uint256 j = 0; j < zoneAuthorizeParametersArray.length; j++) {
+            logZoneParameters(zoneAuthorizeParametersArray[j], 1);
+        }
+        console.log(gStr(0, "]"));
+    }
+
+    function logZoneParameters(
+        ZoneAuthorizeParameters memory zap,
+        uint256 i // indent
+    ) internal view {
+        console.log(gStr(i, "ZoneAuthorizeParameters: {"));
+        console.log(gStr(i + 1, "orderHash", zap.orderHash));
+        console.log(gStr(i + 1, "fulfiller", zap.fulfiller));
+        console.log(gStr(i + 1, "offerer", zap.offerer));
+        console.log(gStr(i + 1, "offer: ["));
+        for (uint256 j = 0; j < zap.offer.length; j++) {
+            logOfferItem(zap.offer[j], i + 1);
+        }
+        console.log(gStr(i + 1, "]"));
+        console.log(gStr(i + 1, "consideration: ["));
+        for (uint256 j = 0; j < zap.consideration.length; j++) {
+            logConsiderationItem(zap.consideration[j], i + 1);
+        }
+        console.log(gStr(i + 1, "]"));
+        console.log(gStr(i + 1, "extraData", zap.extraData));
+        console.log(gStr(i + 1, "orderHashes: ["));
+        for (uint256 j = 0; j < zap.orderHashes.length; j++) {
+            console.log(gStr(i + 2, "", zap.orderHashes[j]));
+        }
+        console.log(gStr(i + 1, "]"));
+        console.log(gStr(i + 1, "startTime", zap.startTime));
+        console.log(gStr(i + 1, "endTime", zap.endTime));
+        console.log(gStr(i + 1, "zoneHash", zap.zoneHash));
+        console.log(gStr(i, "}"));
+    }
+
+    function log(ZoneValidateParameters memory zoneParameters) public view {
         logZoneParameters(zoneParameters, 0);
     }
 
-    function log(ZoneParameters[] memory zoneParametersArray) public view {
+    function log(ZoneValidateParameters[] memory zoneParametersArray)
+        public
+        view
+    {
         console.log(gStr(0, "zoneParametersArray: ["));
         for (uint256 j = 0; j < zoneParametersArray.length; j++) {
             logZoneParameters(zoneParametersArray[j], 1);
@@ -464,10 +516,10 @@ library helm {
     }
 
     function logZoneParameters(
-        ZoneParameters memory zp,
+        ZoneValidateParameters memory zp,
         uint256 i // indent
     ) internal view {
-        console.log(gStr(i, "ZoneParameters: {"));
+        console.log(gStr(i, "ZoneValidateParameters: {"));
         console.log(gStr(i + 1, "orderHash", zp.orderHash));
         console.log(gStr(i + 1, "fulfiller", zp.fulfiller));
         console.log(gStr(i + 1, "offerer", zp.offerer));

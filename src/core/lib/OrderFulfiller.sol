@@ -97,8 +97,6 @@ contract OrderFulfiller is
             advancedOrder.parameters.orderType == OrderType.CONTRACT
         );
 
-        // console.log('in _validateAndFulfillAdvancedOrder above _validateOrderAndUpdateStatus');
-
         // Declare empty bytes32 array (unused, will remain empty).
         // bytes32[] memory priorOrderHashes;
 
@@ -106,13 +104,7 @@ contract OrderFulfiller is
 
         // Validate order, update status, and determine fraction to fill.
         (bytes32 orderHash, uint256 fillNumerator, uint256 fillDenominator) =
-            _validateOrderAndUpdateStatus(
-                advancedOrder,
-                true,
-                priorOrderHashes
-            );
-
-        // console.log('in _validateAndFulfillAdvancedOrder below _validateOrderAndUpdateStatus');
+            _validateOrderAndUpdateStatus(advancedOrder, true, priorOrderHashes);
 
         // Create an array with length 1 containing the order.
         AdvancedOrder[] memory advancedOrders = new AdvancedOrder[](1);
@@ -140,7 +132,7 @@ contract OrderFulfiller is
         orderHashes[0] = orderHash;
 
         // Ensure restricted orders have a valid submitter or pass a zone check.
-        _assertRestrictedAdvancedOrderCheckPasses(
+        _assertRestrictedAdvancedOrderValidity(
             advancedOrders[0], orderHashes, orderHash, false
         );
 

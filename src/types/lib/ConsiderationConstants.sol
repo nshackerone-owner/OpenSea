@@ -502,7 +502,7 @@ uint256 constant ratifyOrder_orderHashes_head_offset = 0x60;
 uint256 constant ratifyOrder_contractNonce_offset = 0x80;
 uint256 constant ratifyOrder_base_tail_offset = 0xa0;
 
-uint256 constant authorizeOrder_selector = 0x01e4d72a;
+uint256 constant authorizeOrder_selector = 0xc7bbd4bd;
 uint256 constant authorizeOrder_selector_offset = 0x1c;
 uint256 constant authorizeOrder_head_offset = 0x04;
 uint256 constant authorizeOrder_zoneParameters_offset = 0x20;

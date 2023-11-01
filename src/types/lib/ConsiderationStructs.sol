@@ -260,7 +260,7 @@ struct ZoneAuthorizeParameters {
  *      and any supplied extraData, as well as all order hashes fulfilled in a
  *      call to a match or fulfillAvailable method.
  */
-struct ZoneParameters {
+struct ZoneValidateParameters {
     bytes32 orderHash;
     address fulfiller;
     address offerer;
@@ -297,7 +297,8 @@ using StructPointers for CriteriaResolver global;
 using StructPointers for Fulfillment global;
 using StructPointers for FulfillmentComponent global;
 using StructPointers for Execution global;
-using StructPointers for ZoneParameters global;
+using StructPointers for ZoneAuthorizeParameters global;
+using StructPointers for ZoneValidateParameters global;
 
 /**
  * @dev This library provides a set of functions for converting structs to
@@ -815,13 +816,13 @@ library StructPointers {
     }
 
     /**
-     * @dev Get a MemoryPointer from ZoneParameters.
+     * @dev Get a MemoryPointer from ZoneAuthorizeParameters.
      *
-     * @param obj The ZoneParameters object.
+     * @param obj The ZoneAuthorizeParameters object.
      *
      * @return ptr The MemoryPointer.
      */
-    function toMemoryPointer(ZoneParameters memory obj)
+    function toMemoryPointer(ZoneAuthorizeParameters memory obj)
         internal
         pure
         returns (MemoryPointer ptr)
@@ -832,13 +833,47 @@ library StructPointers {
     }
 
     /**
-     * @dev Get a CalldataPointer from ZoneParameters.
+     * @dev Get a CalldataPointer from ZoneAuthorizeParameters.
      *
-     * @param obj The ZoneParameters object.
+     * @param obj The ZoneAuthorizeParameters object.
      *
      * @return ptr The CalldataPointer.
      */
-    function toCalldataPointer(ZoneParameters calldata obj)
+    function toCalldataPointer(ZoneAuthorizeParameters calldata obj)
+        internal
+        pure
+        returns (CalldataPointer ptr)
+    {
+        assembly {
+            ptr := obj
+        }
+    }
+
+    /**
+     * @dev Get a MemoryPointer from ZoneValidateParameters.
+     *
+     * @param obj The ZoneValidateParameters object.
+     *
+     * @return ptr The MemoryPointer.
+     */
+    function toMemoryPointer(ZoneValidateParameters memory obj)
+        internal
+        pure
+        returns (MemoryPointer ptr)
+    {
+        assembly {
+            ptr := obj
+        }
+    }
+
+    /**
+     * @dev Get a CalldataPointer from ZoneValidateParameters.
+     *
+     * @param obj The ZoneValidateParameters object.
+     *
+     * @return ptr The CalldataPointer.
+     */
+    function toCalldataPointer(ZoneValidateParameters calldata obj)
         internal
         pure
         returns (CalldataPointer ptr)

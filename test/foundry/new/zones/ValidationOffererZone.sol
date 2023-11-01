@@ -7,7 +7,8 @@ import {
     ReceivedItem,
     Schema,
     SpentItem,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-sol/src/SeaportStructs.sol";
 
 import { ContractOffererInterface } from
@@ -26,7 +27,7 @@ contract ValidationOffererZone is ContractOffererInterface, ZoneInterface {
 
     receive() external payable { }
 
-    function authorizeOrder(ZoneParameters calldata)
+    function authorizeOrder(ZoneAuthorizeParameters calldata)
         public
         pure
         returns (bytes4)
@@ -42,7 +43,7 @@ contract ValidationOffererZone is ContractOffererInterface, ZoneInterface {
      *
      * @return validOrderMagicValue The magic value to indicate things are OK.
      */
-    function validateOrder(ZoneParameters calldata zoneParameters)
+    function validateOrder(ZoneValidateParameters calldata zoneParameters)
         external
         view
         override

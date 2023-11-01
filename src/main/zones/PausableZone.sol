@@ -19,7 +19,8 @@ import {
     Order,
     OrderComponents,
     Schema,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 import { PausableZoneInterface } from "./interfaces/PausableZoneInterface.sol";
@@ -209,7 +210,7 @@ contract PausableZone is
         );
     }
 
-    function authorizeOrder(ZoneParameters calldata)
+    function authorizeOrder(ZoneAuthorizeParameters calldata)
         public
         pure
         returns (bytes4)
@@ -236,7 +237,7 @@ contract PausableZone is
         /**
          * @custom:name zoneParameters
          */
-        ZoneParameters calldata
+        ZoneValidateParameters calldata
     ) external pure override returns (bytes4 validOrderMagicValue) {
         // Return the selector of isValidOrder as the magic value.
         validOrderMagicValue = ZoneInterface.validateOrder.selector;

@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import { ZoneParameters, Schema } from "../lib/ConsiderationStructs.sol";
+import {
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters,
+    Schema
+} from "../lib/ConsiderationStructs.sol";
 
 import { IERC165 } from "./IERC165.sol";
 
@@ -11,20 +15,22 @@ import { IERC165 } from "./IERC165.sol";
  */
 interface ZoneInterface is IERC165 {
     /**
-     * @dev Authorizes an order before any token fulfillments from any order have been executed by Seaport.
+     * @dev Authorizes an order before any token fulfillments from any order
+     *      have been executed by Seaport.
      *
      * @param zoneParameters The context about the order fulfillment and any
      *                       supplied extraData.
      *
      * @return authorizedOrderMagicValue The magic value that indicates a valid
-     *                              order.
+     *                                   order.
      */
-    function authorizeOrder(ZoneParameters calldata zoneParameters)
+    function authorizeOrder(ZoneAuthorizeParameters calldata zoneParameters)
         external
         returns (bytes4 authorizedOrderMagicValue);
 
     /**
-     * @dev Validates an order after all token fulfillments for all orders have been executed by Seaport.
+     * @dev Validates an order after all token fulfillments for all orders have
+     *      been executed by Seaport.
      *
      * @param zoneParameters The context about the order fulfillment and any
      *                       supplied extraData.
@@ -32,7 +38,7 @@ interface ZoneInterface is IERC165 {
      * @return validOrderMagicValue The magic value that indicates a valid
      *                              order.
      */
-    function validateOrder(ZoneParameters calldata zoneParameters)
+    function validateOrder(ZoneValidateParameters calldata zoneParameters)
         external
         returns (bytes4 validOrderMagicValue);
 

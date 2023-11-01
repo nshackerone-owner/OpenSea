@@ -267,9 +267,7 @@ contract OrderCombiner is OrderFulfiller, FulfillmentApplier {
                 // Validate it, update status, and determine fraction to fill.
                 (bytes32 orderHash, uint256 numerator, uint256 denominator) =
                 _validateOrderAndUpdateStatus(
-                    advancedOrder,
-                    revertOnInvalid,
-                    orderHashes
+                    advancedOrder, revertOnInvalid, orderHashes
                 );
 
                 // Do not track hash or adjust prices if order is not fulfilled.
@@ -880,7 +878,7 @@ contract OrderCombiner is OrderFulfiller, FulfillmentApplier {
                 // Ensure the order in question is being fulfilled.
                 if (availableOrders[i]) {
                     // Check restricted orders and contract orders.
-                    _assertRestrictedAdvancedOrderCheckPasses(
+                    _assertRestrictedAdvancedOrderValidity(
                         advancedOrders[i], orderHashes, orderHashes[i], false
                     );
                 }

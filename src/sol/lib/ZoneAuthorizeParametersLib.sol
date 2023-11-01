@@ -11,14 +11,12 @@ import {
     AdvancedOrder,
     ConsiderationItem,
     CriteriaResolver,
+    CriteriaResolver,
     OfferItem,
     Order,
     OrderComponents,
     OrderParameters,
-    SpentItem,
-    ReceivedItem,
-    ZoneParameters,
-    CriteriaResolver
+    ZoneAuthorizeParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 import { SeaportInterface } from "../SeaportInterface.sol";
@@ -43,11 +41,20 @@ import { AmountDeriverHelper } from "./fulfillment/AmountDeriverHelper.sol";
 
 import { OrderDetails } from "../fulfillments/lib/Structs.sol";
 
+import "forge-std/console.sol";
+
 interface FailingContractOfferer {
-    function failureReasonsForValidateOrder(bytes32) external view returns (uint256);
+    function failureReasonsForGenerateOrder(bytes32)
+        external
+        view
+        returns (uint256);
+    function failureReasonsForRatifyOrder(bytes32)
+        external
+        view
+        returns (uint256);
 }
 
-library ZoneParametersLib {
+library ZoneAuthorizeParametersLib {
     using AdvancedOrderLib for AdvancedOrder;
     using AdvancedOrderLib for AdvancedOrder[];
     using OfferItemLib for OfferItem;
@@ -72,13 +79,12 @@ library ZoneParametersLib {
         bytes32[] orderHashes;
     }
 
-    function getZoneParameters(
+    function getZoneAuthorizeParameters(
         AdvancedOrder memory advancedOrder,
         address fulfiller,
         uint256 counter,
-        address seaport,
-        CriteriaResolver[] memory criteriaResolvers
-    ) internal view returns (ZoneParameters memory zoneParameters) {
+        address seaport
+    ) internal view returns (ZoneAuthorizeParameters memory zoneParameters) {
         SeaportInterface seaportInterface = SeaportInterface(seaport);
         // Get orderParameters from advancedOrder
         OrderParameters memory orderParameters = advancedOrder.parameters;
@@ -87,25 +93,17 @@ library ZoneParametersLib {
         bytes32 orderHash =
             advancedOrder.getTipNeutralizedOrderHash(seaportInterface, counter);
 
-        (SpentItem[] memory spentItems, ReceivedItem[] memory receivedItems) =
-        orderParameters.getSpentAndReceivedItems(
-            advancedOrder.numerator,
-            advancedOrder.denominator,
-            0,
-            criteriaResolvers
-        );
-
         // Store orderHash in orderHashes array to pass into zoneParameters
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = orderHash;
 
-        // Create ZoneParameters and add to zoneParameters array
-        zoneParameters = ZoneParameters({
+        // Create ZoneAuthorizeParameters and add to zoneParameters array
+        zoneParameters = ZoneAuthorizeParameters({
             orderHash: orderHash,
             fulfiller: fulfiller,
             offerer: orderParameters.offerer,
-            offer: spentItems,
-            consideration: receivedItems,
+            offer: orderParameters.offer,
+            consideration: orderParameters.consideration,
             extraData: advancedOrder.extraData,
             orderHashes: orderHashes,
             startTime: orderParameters.startTime,
@@ -114,27 +112,26 @@ library ZoneParametersLib {
         });
     }
 
-    function getZoneParameters(
+    function getZoneAuthorizeParameters(
         AdvancedOrder[] memory advancedOrders,
         address fulfiller,
         uint256 maximumFulfilled,
         address seaport,
-        CriteriaResolver[] memory criteriaResolvers,
         UnavailableReason[] memory unavailableReasons
-    ) internal view returns (ZoneParameters[] memory) {
-        return _getZoneParametersFromStruct(
-            _getZoneParametersStruct(
+    ) internal view returns (ZoneAuthorizeParameters[] memory) {
+        return _getZoneAuthorizeParametersFromStruct(
+            _getZoneAuthorizeParametersStruct(
                 advancedOrders,
                 fulfiller,
                 maximumFulfilled,
                 seaport,
-                criteriaResolvers
+                new CriteriaResolver[](0)
             ),
             unavailableReasons
         );
     }
 
-    function _getZoneParametersStruct(
+    function _getZoneAuthorizeParametersStruct(
         AdvancedOrder[] memory advancedOrders,
         address fulfiller,
         uint256 maximumFulfilled,
@@ -150,20 +147,21 @@ library ZoneParametersLib {
         );
     }
 
-    function _getZoneParametersFromStruct(
+    function _getZoneAuthorizeParametersFromStruct(
         ZoneParametersStruct memory zoneParametersStruct,
         UnavailableReason[] memory unavailableReasons
-    ) internal view returns (ZoneParameters[] memory) {
+    ) internal view returns (ZoneAuthorizeParameters[] memory) {
         // TODO: use testHelpers pattern to use single amount deriver helper
         ZoneDetails memory details = _getZoneDetails(zoneParametersStruct);
 
-        // Convert offer + consideration to spent + received
+        // Copy the offer and consideration over to the ZoneDetails struct for
+        // parity for now.
         _applyOrderDetails(details, zoneParametersStruct, unavailableReasons);
 
         // Iterate over advanced orders to calculate orderHashes
         _applyOrderHashes(details, zoneParametersStruct.seaport);
 
-        return _finalizeZoneParameters(details);
+        return _finalizeZoneAuthorizeParameters(details);
     }
 
     function _getZoneDetails(ZoneParametersStruct memory zoneParametersStruct)
@@ -204,6 +202,12 @@ library ZoneParametersLib {
         bytes32[] memory orderHashes =
             details.advancedOrders.getOrderHashes(seaport);
 
+        console.log("orderHashes ============");
+        console.log(orderHashes.length);
+        for (uint256 i = 0; i < orderHashes.length; i++) {
+            console.logBytes32(orderHashes[i]);
+        }
+
         uint256 totalFulfilled = 0;
         // Iterate over advanced orders to calculate orderHashes
         for (uint256 i = 0; i < details.advancedOrders.length; i++) {
@@ -237,8 +241,14 @@ library ZoneParametersLib {
 
         bool isRevertingContractOrder = false;
         if (order.orderType == OrderType.CONTRACT) {
-            isRevertingContractOrder = FailingContractOfferer(order.offerer)
-                .failureReasonsForValidateOrder(orderHash) != 0;
+            isRevertingContractOrder = (
+                FailingContractOfferer(order.offerer)
+                    .failureReasonsForGenerateOrder(orderHash) != 0
+            )
+                || (
+                    FailingContractOfferer(order.offerer)
+                        .failureReasonsForRatifyOrder(orderHash) != 0
+                );
         }
 
         return (
@@ -249,31 +259,42 @@ library ZoneParametersLib {
         );
     }
 
-    function _finalizeZoneParameters(ZoneDetails memory zoneDetails)
+    function _finalizeZoneAuthorizeParameters(ZoneDetails memory zoneDetails)
         internal
         pure
-        returns (ZoneParameters[] memory zoneParameters)
+        returns (ZoneAuthorizeParameters[] memory zoneParameters)
     {
-        zoneParameters = new ZoneParameters[](
+        zoneParameters = new ZoneAuthorizeParameters[](
             zoneDetails.advancedOrders.length
         );
 
         // Iterate through advanced orders to create zoneParameters
         uint256 totalFulfilled = 0;
 
+        // The order hashes array should be length i (3rd order, index 2, order
+        // hashes array length 2) bc the order hashes array is only the prior
+        // order hashes and not the prior plus the current.
+
+        // TODO: confirm with 0 this is the intended behavior.
+
         for (uint256 i = 0; i < zoneDetails.advancedOrders.length; i++) {
             if (totalFulfilled >= zoneDetails.maximumFulfilled) {
                 break;
             }
 
+            bytes32[] memory orderHashes = new bytes32[](i);
+
+            for (uint256 j = 0; j < i; j++) {
+                orderHashes[j] = zoneDetails.orderHashes[j];
+            }
+
             if (zoneDetails.orderHashes[i] != bytes32(0)) {
-                // Create ZoneParameters and add to zoneParameters array
-                zoneParameters[i] = _createZoneParameters(
+                // Create ZoneAuthorizeParameters and add to zoneParameters array
+                zoneParameters[i] = _createZoneAuthorizeParameters(
                     zoneDetails.orderHashes[i],
-                    zoneDetails.orderDetails[i],
                     zoneDetails.advancedOrders[i],
                     zoneDetails.fulfiller,
-                    zoneDetails.orderHashes
+                    orderHashes
                 );
                 ++totalFulfilled;
             }
@@ -282,19 +303,18 @@ library ZoneParametersLib {
         return zoneParameters;
     }
 
-    function _createZoneParameters(
+    function _createZoneAuthorizeParameters(
         bytes32 orderHash,
-        OrderDetails memory orderDetails,
         AdvancedOrder memory advancedOrder,
         address fulfiller,
         bytes32[] memory orderHashes
-    ) internal pure returns (ZoneParameters memory) {
-        return ZoneParameters({
+    ) internal pure returns (ZoneAuthorizeParameters memory) {
+        return ZoneAuthorizeParameters({
             orderHash: orderHash,
             fulfiller: fulfiller,
             offerer: advancedOrder.parameters.offerer,
-            offer: orderDetails.offer,
-            consideration: orderDetails.consideration,
+            offer: advancedOrder.parameters.offer,
+            consideration: advancedOrder.parameters.consideration,
             extraData: advancedOrder.extraData,
             orderHashes: orderHashes,
             startTime: advancedOrder.parameters.startTime,

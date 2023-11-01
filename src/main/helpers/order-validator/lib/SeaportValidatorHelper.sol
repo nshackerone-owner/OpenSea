@@ -9,7 +9,7 @@ import {
     OfferItem,
     ConsiderationItem,
     Schema,
-    ZoneParameters
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 import { ConsiderationTypeHashes } from "./ConsiderationTypeHashes.sol";
 import { ConsiderationInterface } from

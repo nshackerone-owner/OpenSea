@@ -11,7 +11,8 @@ import {
     ReceivedItem,
     Schema,
     SpentItem,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 import { ItemType, Side } from "seaport-types/src/lib/ConsiderationEnums.sol";
@@ -245,17 +246,75 @@ contract HashValidationZoneOfferer is
         failureReasonsForValidateOrder[orderHash] = newFailureReason;
     }
 
-    function authorizeOrder(ZoneParameters calldata zoneParameters)
+    function authorizeOrder(ZoneAuthorizeParameters calldata zoneParameters)
         public
         override
         returns (bytes4 authorizeOrderMagicValue)
     {
+        // struct ZoneAuthorizeParameters {
+        //     bytes32 orderHash;
+        //     address fulfiller;
+        //     address offerer;
+        //     OfferItem[] offer;
+        //     ConsiderationItem[] consideration;
+        //     bytes extraData;
+        //     bytes32[] orderHashes;
+        //     uint256 startTime;
+        //     uint256 endTime;
+        //     bytes32 zoneHash;
+        // }
+
+        ///// console.log("orderHash in ZONE");
+        ///// console.logBytes32(zoneParameters.orderHash);
+
+        ///// console.log("fulfiller in ZONE");
+        ///// console.logAddress(zoneParameters.fulfiller);
+
+        ///// console.log("offerer in ZONE");
+        ///// console.logAddress(zoneParameters.offerer);
+
+        ///// console.log("offer.length in ZONE");
+        ///// console.log(zoneParameters.offer.length);
+
+        for (uint256 i = 0; i < zoneParameters.offer.length; i++) {
+            ///// console.log("offer[i] in ZONE");
+            ///// console.log(i);
+            ///// helm.log(zoneParameters.offer[i]);
+        }
+
+        for (uint256 i = 0; i < zoneParameters.consideration.length; i++) {
+            ///// console.log("consideration[i] in ZONE");
+            ///// console.log(i);
+            ///// helm.log(zoneParameters.consideration[i]);
+        }
+
+        ///// console.log("extraData in ZONE");
+        ///// console.logBytes(zoneParameters.extraData);
+
+        ///// console.log("orderHashes length in ZONE");
+        ///// console.log(zoneParameters.orderHashes.length);
+
+        ///// console.log("startTime in ZONE");
+        ///// console.log(zoneParameters.startTime);
+
+        ///// console.log("endTime in ZONE");
+        ///// console.log(zoneParameters.endTime);
+
+        ///// console.log("zoneHash in ZONE");
+        ///// console.logBytes32(zoneParameters.zoneHash);
+
         console.log("");
         console.log("zoneParameters in ZONE");
         helm.log(zoneParameters);
 
+        ///// console.log("orderHash in ZONE");
+        ///// console.logBytes32(zoneParameters.orderHash);
+
         // Get the orderHash from zoneParameters
         bytes32 orderHash = zoneParameters.orderHash;
+
+        ///// console.log("orderHash in ZONE");
+        ///// console.logBytes32(orderHash);
 
         if (
             failureReasonsForAuthorizeOrder[orderHash]
@@ -264,11 +323,20 @@ contract HashValidationZoneOfferer is
             revert HashValidationZoneOffererAuthorizeOrderReverts();
         }
 
+        ///// console.log("msg.data in ZONE");
+        ///// console.logBytes(msg.data);
+
         // Get the length of msg.data
         uint256 dataLength = msg.data.length;
 
+        ///// console.log("dataLength in ZONE");
+        ///// console.log(dataLength);
+
         // Create a variable to store msg.data in memory
         bytes memory data;
+
+        ///// console.log("data in ZONE");
+        ///// console.logBytes(data);
 
         // Copy msg.data to memory
         assembly {
@@ -278,25 +346,39 @@ contract HashValidationZoneOfferer is
             data := ptr
         }
 
+        ///// console.log("data in ZONE after assembly");
+        ///// console.logBytes(data);
+
         // Get the hash of msg.data
         bytes32 calldataHash = keccak256(data);
+
+        ///// console.log("calldataHash in ZONE");
+        ///// console.logBytes32(calldataHash);
 
         // Store callDataHash in orderHashToAuthorizeOrderDataHash
         orderHashToAuthorizeOrderDataHash[orderHash] = calldataHash;
 
+        ///// console.log("orderHashToAuthorizeOrderDataHash in ZONE");
+
         // Emit a DataHash event with the hash of msg.data
         emit AuthorizeOrderDataHash(calldataHash);
+
+        ///// console.log("emit AuthorizeOrderDataHash in ZONE");
 
         // Set the global authorizeOrderCalled flag to true.
         authorizeOrderCalled = true;
         authorizeOrderCallCount++;
 
+        ///// console.log("authorizeOrderCalled in ZONE");
+
         if (
             failureReasonsForAuthorizeOrder[orderHash]
                 == OffererZoneFailureReason.Zone_InvalidAuthorizeOrderMagicValue
         ) {
+            ///// console.log("failureReasonsForAuthorizeOrder in ZONE");
             authorizeOrderMagicValue = bytes4(0x12345678);
         } else {
+            ///// console.log("magic value in ZONE");
             // Return the selector of validateOrder as the magic value.
             authorizeOrderMagicValue = this.authorizeOrder.selector;
         }
@@ -310,7 +392,7 @@ contract HashValidationZoneOfferer is
      *
      * @return validOrderMagicValue The magic value to indicate things are OK.
      */
-    function validateOrder(ZoneParameters calldata zoneParameters)
+    function validateOrder(ZoneValidateParameters calldata zoneParameters)
         external
         override
         returns (bytes4 validOrderMagicValue)

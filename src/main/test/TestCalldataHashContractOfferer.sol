@@ -11,7 +11,7 @@ import {
     ReceivedItem,
     Schema,
     SpentItem,
-    ZoneParameters
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 import { ItemType } from "seaport-types/src/lib/ConsiderationEnums.sol";

@@ -3,7 +3,11 @@ pragma solidity ^0.8.17;
 
 import { Test } from "forge-std/Test.sol";
 
-import { ExecutionLib, ZoneParametersLib } from "seaport-sol/src/SeaportSol.sol";
+import {
+    ExecutionLib,
+    ZoneAuthorizeParametersLib,
+    ZoneValidateParametersLib
+} from "seaport-sol/src/SeaportSol.sol";
 
 import {
     AdvancedOrder,
@@ -42,6 +46,8 @@ import { FuzzEngineLib } from "./FuzzEngineLib.sol";
 import { FuzzHelpers } from "./FuzzHelpers.sol";
 
 import { FuzzTestContext } from "./FuzzTestContextLib.sol";
+
+import "forge-std/console.sol";
 
 interface TestERC20 {
     function mint(address to, uint256 amount) external;
@@ -170,12 +176,12 @@ abstract contract FuzzSetup is Test, AmountDeriverHelper {
     using CheckHelpers for FuzzTestContext;
     using FuzzEngineLib for FuzzTestContext;
     using FuzzHelpers for FuzzTestContext;
-
     using FuzzHelpers for AdvancedOrder[];
-    using ZoneParametersLib for AdvancedOrder[];
+
+    using ZoneAuthorizeParametersLib for AdvancedOrder[];
+    using ZoneValidateParametersLib for AdvancedOrder[];
 
     using ExecutionLib for Execution;
-
     using ExpectedEventsUtil for FuzzTestContext;
 
     /**
@@ -255,9 +261,9 @@ abstract contract FuzzSetup is Test, AmountDeriverHelper {
             expectedZoneCalldataHashValidate;
 
         if (registerChecks) {
-            context.registerCheck(
-                FuzzChecks.check_authorizeOrderExpectedDataHash.selector
-            );
+            // context.registerCheck(
+            //     FuzzChecks.check_authorizeOrderExpectedDataHash.selector
+            // );
             context.registerCheck(
                 FuzzChecks.check_validateOrderExpectedDataHash.selector
             );

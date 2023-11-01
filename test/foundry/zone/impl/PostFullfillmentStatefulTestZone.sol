@@ -2,7 +2,8 @@
 pragma solidity ^0.8.17;
 
 import {
-    ZoneParameters,
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters,
     Schema
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
@@ -25,7 +26,7 @@ contract PostFulfillmentStatefulTestZone is ERC165, ZoneInterface {
 
     bool public validateOrderCalled = false;
 
-    function authorizeOrder(ZoneParameters calldata)
+    function authorizeOrder(ZoneAuthorizeParameters calldata)
         public
         pure
         returns (bytes4)
@@ -41,7 +42,7 @@ contract PostFulfillmentStatefulTestZone is ERC165, ZoneInterface {
      *
      * @return validOrderMagicValue The validOrder magic value.
      */
-    function validateOrder(ZoneParameters calldata zoneParameters)
+    function validateOrder(ZoneValidateParameters calldata zoneParameters)
         external
         returns (bytes4 validOrderMagicValue)
     {

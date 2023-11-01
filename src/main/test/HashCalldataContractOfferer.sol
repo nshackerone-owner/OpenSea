@@ -13,7 +13,7 @@ import {
     ReceivedItem,
     Schema,
     SpentItem,
-    ZoneParameters
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 import { ItemType, Side } from "seaport-types/src/lib/ConsiderationEnums.sol";
@@ -58,7 +58,9 @@ contract HashCalldataContractOfferer is ContractOffererInterface {
     ExtraItemMutation[] public extraItemMutations;
 
     mapping(bytes32 => OffererZoneFailureReason) public
-        failureReasonsForValidateOrder;
+        failureReasonsForGenerateOrder;
+    mapping(bytes32 => OffererZoneFailureReason) public
+        failureReasonsForRatifyOrder;
 
     address private _SEAPORT;
     address internal _expectedOfferRecipient;
@@ -66,11 +68,18 @@ contract HashCalldataContractOfferer is ContractOffererInterface {
     mapping(bytes32 => bytes32) public orderHashToGenerateOrderDataHash;
     mapping(bytes32 => bytes32) public orderHashToRatifyOrderDataHash;
 
-    function setValidateFailureReason(
+    function setGenerateFailureReason(
         bytes32 orderHash,
         OffererZoneFailureReason newFailureReason
     ) external {
-        failureReasonsForValidateOrder[orderHash] = newFailureReason;
+        failureReasonsForGenerateOrder[orderHash] = newFailureReason;
+    }
+
+    function setRatifyFailureReason(
+        bytes32 orderHash,
+        OffererZoneFailureReason newFailureReason
+    ) external {
+        failureReasonsForRatifyOrder[orderHash] = newFailureReason;
     }
 
     function addItemAmountMutation(
@@ -242,13 +251,17 @@ contract HashCalldataContractOfferer is ContractOffererInterface {
             contractOffererNonce ^ (uint256(uint160(address(this))) << 96)
         );
 
+        // TOMORROW: Port this over to failureReasonsForGenerateOrder and
+        // failureReasonsForRatifyOrder. Or maybe that's not right, but fix
+        // this.
+
         if (
-            failureReasonsForValidateOrder[orderHash]
+            failureReasonsForGenerateOrder[orderHash]
                 == OffererZoneFailureReason.ContractOfferer_generateReverts
         ) {
             revert HashCalldataContractOffererGenerateOrderReverts();
         } else if (
-            failureReasonsForValidateOrder[orderHash]
+            failureReasonsForGenerateOrder[orderHash]
                 == OffererZoneFailureReason
                     .ContractOfferer_generateReturnsInvalidEncoding
         ) {
@@ -370,7 +383,7 @@ contract HashCalldataContractOfferer is ContractOffererInterface {
             bytes32(contractNonce ^ (uint256(uint160(address(this))) << 96));
 
         if (
-            failureReasonsForValidateOrder[orderHash]
+            failureReasonsForRatifyOrder[orderHash]
                 == OffererZoneFailureReason.ContractOfferer_ratifyReverts
         ) {
             revert HashCalldataContractOffererRatifyOrderReverts();
@@ -395,7 +408,7 @@ contract HashCalldataContractOfferer is ContractOffererInterface {
         }
 
         if (
-            failureReasonsForValidateOrder[orderHash]
+            failureReasonsForRatifyOrder[orderHash]
                 == OffererZoneFailureReason.ContractOfferer_InvalidMagicValue
         ) {
             return bytes4(0x12345678);

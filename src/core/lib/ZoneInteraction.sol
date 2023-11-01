@@ -92,7 +92,7 @@ contract ZoneInteraction is
      *                      the current fulfillment.
      * @param orderHash     The hash of the order.
      */
-    function _assertRestrictedAdvancedOrderCheckPasses(
+    function _assertRestrictedAdvancedOrderValidity(
         AdvancedOrder memory advancedOrder,
         bytes32[] memory orderHashes,
         bytes32 orderHash,
@@ -107,19 +107,26 @@ contract ZoneInteraction is
         // Retrieve the parameters of the order in question.
         OrderParameters memory parameters = advancedOrder.parameters;
 
-        // console.log('in _assertRestrictedAdvancedOrderCheckPasses above _isRestrictedAndCallerNotZone');
+        // ///// console.log('in _assertRestrictedAdvancedOrderValidity above _isRestrictedAndCallerNotZone');
 
         // OrderType 2-3 require zone to be caller or approve via validateOrder.
         if (
             _isRestrictedAndCallerNotZone(parameters.orderType, parameters.zone)
         ) {
-            // console.log('in _assertRestrictedAdvancedOrderCheckPasses above _encodeZoneCheckOrder');
-            // Encode the `validateOrder` call in memory.
-            (callData, size) = _encodeZoneCheckOrder(
-                orderHash, parameters, advancedOrder.extraData, orderHashes, isPreExec
-            );
+            // ///// console.log('in _assertRestrictedAdvancedOrderValidity above _encodeValidateOrder');
 
-            // console.log('in _assertRestrictedAdvancedOrderCheckPasses below _encodeZoneCheckOrder');
+            if (isPreExec) {
+                (callData, size) = _encodeAuthorizeOrder(
+                    orderHash, parameters, advancedOrder.extraData, orderHashes
+                );
+            } else {
+                // Encode the `validateOrder` call in memory.
+                (callData, size) = _encodeValidateOrder(
+                    orderHash, parameters, advancedOrder.extraData, orderHashes
+                );
+            }
+
+            // ///// console.log('in _assertRestrictedAdvancedOrderValidity below _encodeValidateOrder');
 
             // Set the target to the zone.
             target = (

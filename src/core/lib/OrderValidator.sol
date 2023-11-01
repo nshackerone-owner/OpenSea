@@ -226,14 +226,10 @@ contract OrderValidator is Executor, ZoneInteraction {
         // Retrieve current counter & use it w/ parameters to derive order hash.
         orderHash = _assertConsiderationLengthAndGetOrderHash(orderParameters);
 
-        // console.log('in _validateOrderAndUpdateStatus above _assertRestrictedAdvancedOrderCheckPasses');
-
         // Check restricted orders and contract orders.
-        _assertRestrictedAdvancedOrderCheckPasses(
+        _assertRestrictedAdvancedOrderValidity(
             advancedOrder, priorOrderHashes, orderHash, true
         );
-
-        // console.log('in _validateOrderAndUpdateStatus below _assertRestrictedAdvancedOrderCheckPasses');
 
         // Retrieve the order status using the derived order hash.
         OrderStatus storage orderStatus = _orderStatus[orderHash];

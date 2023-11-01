@@ -15,7 +15,7 @@ import {
     BasicOrderParameters,
     ReceivedItem,
     SpentItem,
-    ZoneParameters
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 import { OrderToExecute } from "./ReferenceConsiderationStructs.sol";
@@ -73,7 +73,7 @@ contract ReferenceZoneInteraction is ZoneInteractionErrors {
             // Validate the order with the zone.
             if (
                 ZoneInterface(basicOrderParameters.zone).validateOrder(
-                    ZoneParameters({
+                    ZoneValidateParameters({
                         orderHash: orderHash,
                         fulfiller: msg.sender,
                         offerer: basicOrderParameters.offerer,
@@ -125,7 +125,7 @@ contract ReferenceZoneInteraction is ZoneInteractionErrors {
             // Validate the order.
             if (
                 ZoneInterface(zone).validateOrder(
-                    ZoneParameters({
+                    ZoneValidateParameters({
                         orderHash: orderHash,
                         fulfiller: msg.sender,
                         offerer: offerer,

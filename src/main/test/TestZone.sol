@@ -5,11 +5,12 @@ import { ZoneInterface } from "seaport-types/src/interfaces/ZoneInterface.sol";
 import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {
     Schema,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 contract TestZone is ERC165, ZoneInterface {
-    function authorizeOrder(ZoneParameters calldata)
+    function authorizeOrder(ZoneAuthorizeParameters calldata)
         public
         pure
         returns (bytes4)
@@ -17,7 +18,7 @@ contract TestZone is ERC165, ZoneInterface {
         return this.authorizeOrder.selector;
     }
 
-    function validateOrder(ZoneParameters calldata zoneParameters)
+    function validateOrder(ZoneValidateParameters calldata zoneParameters)
         external
         pure
         override

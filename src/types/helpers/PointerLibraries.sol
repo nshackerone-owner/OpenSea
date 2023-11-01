@@ -245,7 +245,7 @@ library MemoryPointerLib {
         internal
         view
     {
-        // // console.log('in copy 2');
+        // // ///// console.log('in copy 2');
 
         // bool success;
 
@@ -258,13 +258,13 @@ library MemoryPointerLib {
         //     returnDataSize := returndatasize()
         // }
 
-        // // console.log('success');
-        // console.log(success);
+        // // ///// console.log('success');
+        // ///// console.log(success);
 
-        // // console.log('returnDataSize');
-        // console.log(returnDataSize);
-        
-        // // console.log('in copy 1');
+        // // ///// console.log('returnDataSize');
+        // ///// console.log(returnDataSize);
+
+        // // ///// console.log('in copy 1');
 
         // // assembly {
         // //     success :=
@@ -280,9 +280,8 @@ library MemoryPointerLib {
             if iszero(success) { revert(0, 0) }
         }
 
-        // // console.log('in copy 0');
+        // // ///// console.log('in copy 0');
     }
-    
 
     function lt(MemoryPointer a, MemoryPointer b)
         internal

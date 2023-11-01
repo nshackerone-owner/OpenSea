@@ -9,7 +9,7 @@ import {
     OfferItem,
     ConsiderationItem,
     Schema,
-    ZoneParameters
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 import { ConsiderationTypeHashes } from "./lib/ConsiderationTypeHashes.sol";
 import { ConsiderationInterface } from
@@ -992,14 +992,14 @@ contract SeaportValidator is
      */
     function validateOrderWithZone(
         OrderParameters memory orderParameters,
-        ZoneParameters memory zoneParameters
+        ZoneValidateParameters memory zoneParameters
     ) public view returns (ErrorsAndWarnings memory errorsAndWarnings) {
         errorsAndWarnings = ErrorsAndWarnings(new uint16[](0), new uint16[](0));
 
         // Call isValidZone to check if zone is set and implements EIP165
         errorsAndWarnings.concat(isValidZone(orderParameters));
 
-        // Call zone function `validateOrder` with the supplied ZoneParameters
+        // Call zone function `validateOrder` with the supplied ZoneValidateParameters
         if (
             !orderParameters.zone.safeStaticCallBytes4(
                 abi.encodeWithSelector(

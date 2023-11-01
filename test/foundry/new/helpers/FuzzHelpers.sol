@@ -11,7 +11,8 @@ import {
     OrderLib,
     OrderParametersLib,
     SeaportArrays,
-    ZoneParametersLib
+    ZoneAuthorizeParametersLib,
+    ZoneValidateParametersLib
 } from "seaport-sol/src/SeaportSol.sol";
 
 import {
@@ -25,7 +26,8 @@ import {
     OrderParameters,
     ReceivedItem,
     SpentItem,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-sol/src/SeaportStructs.sol";
 
 import {
@@ -135,8 +137,10 @@ library FuzzHelpers {
     using ConsiderationItemLib for ConsiderationItem[];
     using AdvancedOrderLib for AdvancedOrder;
     using AdvancedOrderLib for AdvancedOrder[];
-    using ZoneParametersLib for AdvancedOrder;
-    using ZoneParametersLib for AdvancedOrder[];
+    using ZoneAuthorizeParametersLib for AdvancedOrder;
+    using ZoneAuthorizeParametersLib for AdvancedOrder[];
+    using ZoneValidateParametersLib for AdvancedOrder;
+    using ZoneValidateParametersLib for AdvancedOrder[];
     using FuzzInscribers for AdvancedOrder;
 
     event ExpectedGenerateOrderDataHash(bytes32 dataHash);
@@ -737,7 +741,7 @@ library FuzzHelpers {
     }
 
     /**
-     * @dev Derive ZoneParameters from a given restricted order and return
+     * @dev Derive ZoneValidateParameters from a given restricted order and return
      *      the expected calldata hash for the call to validateOrder.
      *
      * @param orders             The restricted orders.
@@ -762,17 +766,14 @@ library FuzzHelpers {
     ) internal view returns (bytes32[] memory calldataHashes) {
         calldataHashes = new bytes32[](orders.length);
 
-        ZoneParameters[] memory zoneParameters = orders.getZoneParameters(
-            fulfiller,
-            maximumFulfilled,
-            seaport,
-            criteriaResolvers,
-            unavailableReasons
-        );
+        // TODO: update to the new pre exec pattern.
+        if (isPreExec) {
+            ZoneAuthorizeParameters[] memory zoneParameters = orders
+                .getZoneAuthorizeParameters(
+                fulfiller, maximumFulfilled, seaport, unavailableReasons
+            );
 
-        for (uint256 i; i < zoneParameters.length; ++i) {
-            // TODO: update to the new pre exec pattern.
-            if (isPreExec) {
+            for (uint256 i; i < zoneParameters.length; ++i) {
                 console.log("");
                 console.log("i");
                 console.log(i);
@@ -785,9 +786,19 @@ library FuzzHelpers {
                 );
 
                 console.log("");
-                console.log("ZoneParameters in MOAT");
+                console.log("ZoneAuthorizeParameters in MOAT");
                 helm.log(zoneParameters[i]);
-            } else {
+            }
+        } else {
+            ZoneValidateParameters[] memory zoneParameters = orders
+                .getZoneValidateParameters(
+                fulfiller,
+                maximumFulfilled,
+                seaport,
+                criteriaResolvers,
+                unavailableReasons
+            );
+            for (uint256 i; i < zoneParameters.length; ++i) {
                 // Derive the expected calldata hash for the call to validateOrder
                 calldataHashes[i] = keccak256(
                     abi.encodeCall(

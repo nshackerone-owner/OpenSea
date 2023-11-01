@@ -12,11 +12,12 @@ import { ItemType } from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {
     ReceivedItem,
     Schema,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 contract TestPostExecution is ERC165, ZoneInterface {
-    function authorizeOrder(ZoneParameters calldata)
+    function authorizeOrder(ZoneAuthorizeParameters calldata)
         public
         pure
         returns (bytes4)
@@ -24,7 +25,7 @@ contract TestPostExecution is ERC165, ZoneInterface {
         return this.authorizeOrder.selector;
     }
 
-    function validateOrder(ZoneParameters calldata zoneParameters)
+    function validateOrder(ZoneValidateParameters calldata zoneParameters)
         external
         view
         override

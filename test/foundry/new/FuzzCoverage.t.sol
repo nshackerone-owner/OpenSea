@@ -96,9 +96,27 @@ contract FuzzCoverageTestSuite is FuzzEngine {
         _run(LibPRNG.PRNG({ state: 20 }));
     }
 
+    // Error: Mutation InvalidRestrictedOrder_authorizeOrder_reverts did not revert
+    // fulfillbasic case
     function test_fuzzCoverage_x() public {
-        _runConcrete(0, 0, 0, 0);
+        _runConcrete(
+            2856846766192708216546182981432755433,
+            20476476895748533904717455826742110112307111209663369,
+            5509947948824545774533913002920099689183485291459,
+            3
+        );
     }
+
+    // Mutation InvalidRestrictedOrder_authorizeOrder_InvalidMagicValue did not revert
+    // (case where the magic value is not right and order should be skipped)
+    // function test_fuzzCoverage_x() public {
+    //     _runConcrete(
+    //         3,
+    //         469799778541162566993890404059,
+    //         2047743077265194449864421372033681974383699505640081590726822306520003127,
+    //         1
+    //     );
+    // }
 
     function _run(LibPRNG.PRNG memory prng) internal {
         uint256 seed = prng.next();

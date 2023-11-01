@@ -12,7 +12,8 @@ import {
     ReceivedItem,
     Schema,
     SpentItem,
-    ZoneParameters
+    ZoneAuthorizeParameters,
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 import { ItemType } from "seaport-types/src/lib/ConsiderationEnums.sol";
@@ -73,7 +74,7 @@ contract TestTransferValidationZoneOfferer is
     bool public validateOrderCalled = false;
     uint256 public callCount = 0;
 
-    function authorizeOrder(ZoneParameters calldata)
+    function authorizeOrder(ZoneAuthorizeParameters calldata)
         public
         pure
         returns (bytes4)
@@ -89,7 +90,7 @@ contract TestTransferValidationZoneOfferer is
      *
      * @return validOrderMagicValue The magic value to indicate things are OK.
      */
-    function validateOrder(ZoneParameters calldata zoneParameters)
+    function validateOrder(ZoneValidateParameters calldata zoneParameters)
         external
         override
         returns (bytes4 validOrderMagicValue)

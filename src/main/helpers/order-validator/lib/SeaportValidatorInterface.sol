@@ -5,7 +5,7 @@ import { ItemType } from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {
     Order,
     OrderParameters,
-    ZoneParameters
+    ZoneValidateParameters
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 import { ErrorsAndWarnings } from "./ErrorsAndWarnings.sol";
 import { ValidationConfiguration } from "./SeaportValidatorTypes.sol";
@@ -205,7 +205,7 @@ interface SeaportValidatorInterface {
      */
     function validateOrderWithZone(
         OrderParameters memory orderParameters,
-        ZoneParameters memory zoneParameters
+        ZoneValidateParameters memory zoneParameters
     ) external view returns (ErrorsAndWarnings memory errorsAndWarnings);
 
     /**

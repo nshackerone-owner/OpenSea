@@ -31,6 +31,10 @@ import {
 import { ConsiderationInterface } from
     "seaport-types/src/interfaces/ConsiderationInterface.sol";
 
+import "forge-std/console.sol";
+
+import "seaport-sol/src/helm.sol";
+
 contract PostFulfillmentCheckTest is BaseOrderTest {
     TestZone zone = new TestZone();
     PostFulfillmentStatefulTestZone statefulZone =
@@ -86,7 +90,7 @@ contract PostFulfillmentCheckTest is BaseOrderTest {
     }
 
     function execAscendingAmount(Context memory context) public stateless {
-        addErc20OfferItem(1, 101);
+        addErc20OfferItem(2, 101);
         addErc721ConsiderationItem(alice, 42);
         test721_1.mint(address(this), 42);
 
@@ -117,6 +121,10 @@ contract PostFulfillmentCheckTest is BaseOrderTest {
         });
         CriteriaResolver[] memory criteriaResolvers;
         vm.warp(50);
+
+        // console.log("order");
+        // helm.log(order);
+
         context.consideration.fulfillAdvancedOrder({
             advancedOrder: order,
             criteriaResolvers: criteriaResolvers,

@@ -11,7 +11,7 @@ import {
     OrderLib,
     OrderParametersLib,
     SeaportArrays,
-    ZoneParametersLib
+    ZoneValidateParametersLib
 } from "seaport-sol/src/SeaportSol.sol";
 
 import {
@@ -62,7 +62,7 @@ contract FuzzEngineTest is FuzzEngine {
     using OrderComponentsLib for OrderComponents;
     using OrderLib for Order;
     using OrderParametersLib for OrderParameters;
-    using ZoneParametersLib for AdvancedOrder[];
+    using ZoneValidateParametersLib for AdvancedOrder[];
 
     using FuzzEngineLib for FuzzTestContext;
     using FuzzHelpers for FuzzTestContext;
